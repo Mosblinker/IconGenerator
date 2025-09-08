@@ -486,6 +486,9 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         formatImageCombo = new javax.swing.JComboBox<>();
         includeToggle = new javax.swing.JCheckBox();
         javax.swing.Box.Filler filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
+        circleToggle = new javax.swing.JCheckBox();
+        jLabel5 = new javax.swing.JLabel();
+        featheringSpinner = new javax.swing.JSpinner();
         jMenuBar1 = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openMenuItem = new javax.swing.JMenuItem();
@@ -674,10 +677,39 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         controlPanel.add(includeToggle, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.3;
         controlPanel.add(filler2, gridBagConstraints);
+
+        circleToggle.setText("Make Icon Circular");
+        circleToggle.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
+        controlPanel.add(circleToggle, gridBagConstraints);
+
+        jLabel5.setText("Feathering: ");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
+        controlPanel.add(jLabel5, gridBagConstraints);
+
+        featheringSpinner.setModel(new javax.swing.SpinnerNumberModel(100.0d, 0.0d, 100.0d, 1.0d));
+        featheringSpinner.setEditor(new javax.swing.JSpinner.NumberEditor(featheringSpinner, "#0.0%"));
+        featheringSpinner.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
+        controlPanel.add(featheringSpinner, gridBagConstraints);
 
         fileMenu.setText("File");
 
@@ -795,7 +827,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(previewLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 516, Short.MAX_VALUE)
+                .addComponent(previewLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 485, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(settingsButton)
@@ -1175,8 +1207,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private SaveIconImages saver = null;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBoxMenuItem activeTestToggle;
+    private javax.swing.JCheckBox circleToggle;
     private javax.swing.JPanel controlPanel;
     private javax.swing.JMenu debugMenu;
+    private javax.swing.JSpinner featheringSpinner;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JComboBox<String> formatImageCombo;
     private javax.swing.JCheckBox includeToggle;
@@ -1184,6 +1218,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JButton openButton;
