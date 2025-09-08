@@ -481,11 +481,11 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         scaleCombo = new javax.swing.JComboBox<>();
         jLabel4 = new javax.swing.JLabel();
         scaleOverrideCombo = new javax.swing.JComboBox<>();
-        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
+        javax.swing.Box.Filler filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
         jLabel2 = new javax.swing.JLabel();
         formatImageCombo = new javax.swing.JComboBox<>();
         includeToggle = new javax.swing.JCheckBox();
-        filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
+        javax.swing.Box.Filler filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
         jMenuBar1 = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openMenuItem = new javax.swing.JMenuItem();
@@ -1178,8 +1178,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private javax.swing.JPanel controlPanel;
     private javax.swing.JMenu debugMenu;
     private javax.swing.JMenu fileMenu;
-    private javax.swing.Box.Filler filler1;
-    private javax.swing.Box.Filler filler2;
     private javax.swing.JComboBox<String> formatImageCombo;
     private javax.swing.JCheckBox includeToggle;
     private javax.swing.JLabel jLabel1;
