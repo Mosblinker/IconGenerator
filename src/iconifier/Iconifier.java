@@ -706,7 +706,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
         controlPanel.add(jLabel5, gridBagConstraints);
 
-        featheringSpinner.setModel(new javax.swing.SpinnerNumberModel(100.0d, 0.0d, 100.0d, 1.0d));
+        featheringSpinner.setModel(new javax.swing.SpinnerNumberModel(Float.valueOf(1.0f), Float.valueOf(0.0f), Float.valueOf(1.0f), Float.valueOf(0.01f)));
         featheringSpinner.setEditor(new javax.swing.JSpinner.NumberEditor(featheringSpinner, "#0.0%"));
         featheringSpinner.setEnabled(false);
         featheringSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
