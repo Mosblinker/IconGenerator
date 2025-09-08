@@ -685,6 +685,11 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
         circleToggle.setText("Make Icon Circular");
         circleToggle.setEnabled(false);
+        circleToggle.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                circleToggleActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -704,6 +709,11 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         featheringSpinner.setModel(new javax.swing.SpinnerNumberModel(100.0d, 0.0d, 100.0d, 1.0d));
         featheringSpinner.setEditor(new javax.swing.JSpinner.NumberEditor(featheringSpinner, "#0.0%"));
         featheringSpinner.setEnabled(false);
+        featheringSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                featheringSpinnerStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 2;
@@ -1118,6 +1128,14 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 config.putInt(OPEN_FILE_CHOOSER_FILE_FILTER_KEY, index);
         }
     }//GEN-LAST:event_openFCPropertyChange
+
+    private void circleToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_circleToggleActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_circleToggleActionPerformed
+
+    private void featheringSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_featheringSpinnerStateChanged
+        // TODO add your handling code here:
+    }//GEN-LAST:event_featheringSpinnerStateChanged
     
     
     
@@ -1205,6 +1223,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private final boolean debugMode;
     private GenerateImages imgGen = null;
     private SaveIconImages saver = null;
+    private BufferedImage mask = null;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBoxMenuItem activeTestToggle;
     private javax.swing.JCheckBox circleToggle;
