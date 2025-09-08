@@ -197,6 +197,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     
     private static final String SCALE_IMAGE_SETTING_KEY = "ScaleImage";
     
+    private static final String CIRCULAR_ICON_SETTING_KEY = "CircularIcon";
+    
+    private static final String FEATHERING_SETTING_KEY = "Feathering";
+    
     private static final String OPEN_FILE_CHOOSER_DIRECTORY_KEY = 
             "OpenFCCurrentDirectory";
     /**
@@ -273,6 +277,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             int filter = config.getInt(OPEN_FILE_CHOOSER_FILE_FILTER_KEY, -1);
             if (filter >= 0 && filter < openFC.getChoosableFileFilters().length)
                 openFC.setFileFilter(openFC.getChoosableFileFilters()[filter]);
+            circleToggle.setSelected(config.getBoolean(CIRCULAR_ICON_SETTING_KEY, 
+                    circleToggle.isSelected()));
+            featheringSpinner.setValue(Math.max(Math.min(
+                    config.getFloat(FEATHERING_SETTING_KEY, 1.0f), 1.0f), 0.0f));
         } catch (SecurityException | IllegalStateException ex){
             config = null;
             System.out.println("Unable to load settings: " +ex);
@@ -1130,14 +1138,17 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     }//GEN-LAST:event_openFCPropertyChange
 
     private void circleToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_circleToggleActionPerformed
-        // TODO add your handling code here:
+        updateConfigBoolean(CIRCULAR_ICON_SETTING_KEY,circleToggle);
     }//GEN-LAST:event_circleToggleActionPerformed
 
     private void featheringSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_featheringSpinnerStateChanged
-        // TODO add your handling code here:
+        float feathering = getFeathering();
+        config.putFloat(FEATHERING_SETTING_KEY, feathering);
     }//GEN-LAST:event_featheringSpinnerStateChanged
     
-    
+    private float getFeathering(){
+        return (float) featheringSpinner.getValue();
+    }
     
     /**
      * @param args the command line arguments
