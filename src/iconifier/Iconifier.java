@@ -12,6 +12,7 @@ import components.progress.JProgressDisplayMenu;
 import files.FilesExtended;
 import files.extensions.ImageExtensions;
 import icons.*;
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -1026,7 +1027,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private final boolean debugMode;
     private GenerateImages1 imgGen = null;
     private SaveIconImages saver = null;
-    private BufferedImage mask = null;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBoxMenuItem activeTestToggle;
     private javax.swing.JCheckBox circleToggle;
@@ -1107,6 +1107,46 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private void incrementProgress(){
         progressBar.setValue(progressBar.getValue()+1);
         slowTestToggle.runSlowTest();
+    }
+    /**
+     * 
+     * @param g
+     * @param mask
+     * @param x
+     * @param y
+     * @param invert 
+     */
+    private void maskImage(Graphics2D g, Image mask, int x, int y, 
+            boolean invert){
+        g.setComposite((invert)?AlphaComposite.DstOut:AlphaComposite.DstIn);
+        g.drawImage(mask, x, y, null);
+    }
+    /**
+     * 
+     * @param g
+     * @param mask
+     * @param x
+     * @param y 
+     */
+    private void maskImage(Graphics2D g, Image mask, int x, int y){
+        maskImage(g,mask,x,y,false);
+    }
+    /**
+     * 
+     * @param g
+     * @param mask
+     * @param invert 
+     */
+    private void maskImage(Graphics2D g, Image mask, boolean invert){
+        maskImage(g,mask,0,0,invert);
+    }
+    /**
+     * 
+     * @param g
+     * @param mask 
+     */
+    private void maskImage(Graphics2D g, Image mask){
+        maskImage(g,mask,false);
     }
     
     private BufferedImage scaleImage(BufferedImage image,int x,int y,int w,int h,
@@ -1221,8 +1261,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 y = Math.floorDiv(height - h, 2);
                 break;
         }
-//        System.out.printf("%3d %3d: (%3d, %3d) %3d x %3d (%3d x %3d) (%3d x %3d, %2.5f)%n",
-//                format,interpolation,x,y,w,h,width,height,image.getWidth(),image.getHeight(),ratio);
         return scaleImage(image,x, y, w, h,width,height, interpolation);
     }
     
@@ -1245,6 +1283,20 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         return icon;
     }
     
+//    private class GenerateImages extends SwingWorker<Void, Void>{
+//        
+//        private final File file;
+//        
+//        private BufferedImage image;
+//        
+//        private final ArrayList<ICOImage>> newIcons 
+//
+//        @Override
+//        protected Void doInBackground() throws Exception {
+//            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+//        }
+//        
+//    }
     
     private class GenerateImages1 extends SwingWorker<Void, Void>{
         
