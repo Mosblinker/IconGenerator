@@ -1011,6 +1011,12 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             java.util.logging.Logger.getLogger(Iconifier.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
+            // If there is no look and feel set
+        if (UIManager.getLookAndFeel() == null)
+            getLogger().log(Level.CONFIG, "Look and Feel: null");
+        else    // Log the current Look and Feel
+            getLogger().log(Level.CONFIG, "Look and Feel: {0}",
+                    UIManager.getLookAndFeel().getName());
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
