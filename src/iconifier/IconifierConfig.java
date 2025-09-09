@@ -39,7 +39,7 @@ public class IconifierConfig {
      */
     public static final String ALWAYS_SCALE_KEY = "AlwaysScale";
     
-    public static final String IMAGE_FORMAT_SETTING_KEY = "FormatImage";
+    public static final String IMAGE_FORMATTING_KEY = "FormatImage";
     
     public static final String SCALE_IMAGE_SETTING_KEY = "ScaleImage";
     
@@ -453,6 +453,30 @@ public class IconifierConfig {
      */
     public void setImageAlwaysScaled(boolean value){
         getPreferences().putBoolean(ALWAYS_SCALE_KEY, value);
+    }
+    /**
+     * 
+     * @param defaultValue
+     * @return 
+     */
+    public int getImageFormatSetting(int defaultValue){
+        return Math.min(Math.max(getPreferences().getInt(IMAGE_FORMATTING_KEY, 
+                defaultValue), Iconifier.FIRST_IMAGE_FORMATTING), 
+                Iconifier.LAST_IMAGE_FORMATTING);
+    }
+    /**
+     * 
+     * @return 
+     */
+    public int getImageFormatting(){
+        return getImageFormatSetting(Iconifier.IMAGE_FORMATTING_CENTERED);
+    }
+    /**
+     * 
+     * @param value 
+     */
+    public void setImageFormatting(int value){
+        getPreferences().putInt(IMAGE_FORMATTING_KEY, value);
     }
     /**
      * 

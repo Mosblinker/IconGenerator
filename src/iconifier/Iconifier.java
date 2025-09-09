@@ -119,23 +119,23 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         return new ICOImage(img,info,ICOEncoder.createIconEntry(info));
     }
     
-    private static final int FORMAT_IMAGE_SETTING_SCALED = 0;
+    public static final int IMAGE_FORMATTING_SCALED = 0;
     
-    private static final int FORMAT_IMAGE_SETTING_CENTERED = 1;
+    protected static final int IMAGE_FORMATTING_CENTERED = 1;
     
-    private static final int FORMAT_IMAGE_SETTING_UP_LEFT = 2;
+    protected static final int IMAGE_FORMATTING_UP_LEFT = 2;
     
-    private static final int FORMAT_IMAGE_SETTING_DOWN_RIGHT = 3;
+    protected static final int IMAGE_FORMATTING_DOWN_RIGHT = 3;
     
-    private static final int FORMAT_IMAGE_SETTING_CROP_CENTER = 4;
+    protected static final int IMAGE_FORMATTING_CROP_CENTER = 4;
     
-    private static final int FORMAT_IMAGE_SETTING_CROP_UP_LEFT = 5;
+    protected static final int IMAGE_FORMATTING_CROP_UP_LEFT = 5;
     
-    private static final int FORMAT_IMAGE_SETTING_CROP_DOWN_RIGHT = 6;
+    protected static final int IMAGE_FORMATTING_CROP_DOWN_RIGHT = 6;
     
-    private static final int FIRST_FORMAT_IMAGE_SETTING = FORMAT_IMAGE_SETTING_SCALED;
+    protected static final int FIRST_IMAGE_FORMATTING = IMAGE_FORMATTING_SCALED;
     
-    private static final int LAST_FORMAT_IMAGE_SETTING = FORMAT_IMAGE_SETTING_CROP_DOWN_RIGHT;
+    protected static final int LAST_IMAGE_FORMATTING = IMAGE_FORMATTING_CROP_DOWN_RIGHT;
     
     private static final int SCALE_IMAGE_SETTING_NEAREST_NEIGHBOR = 0;
     
@@ -153,7 +153,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     
     private static final int ICONS_GENERATED_COUNT = 
             (DEFAULT_ICON_DIMENSIONS.length * (DEFAULT_BITS_PER_PIXEL.length+1) * 
-            (LAST_FORMAT_IMAGE_SETTING+1) * (LAST_SCALE_IMAGE_SETTING+1)) + 
+            (LAST_IMAGE_FORMATTING+1) * (LAST_SCALE_IMAGE_SETTING+1)) + 
             (LAST_SCALE_IMAGE_SETTING+1);
     
     private static final int DEFAULT_BORDER_THICKNESS = 3;
@@ -163,16 +163,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      */
     private static final String PREFERENCE_NODE_NAME = 
             "milo/icon/gen/IconGenerator";
-    /**
-     * This is the key in the component-specific preference node for the widths 
-     * of components.
-     */
-    private static final String PREFERENCE_WIDTH_KEY = "WindowWidth";
-    /**
-     * This is the key in the component-specific preference node for the heights 
-     * of components.
-     */
-    private static final String PREFERENCE_HEIGHT_KEY = "WindowHeight";
     /**
      * This is the name of the child preference node used to store values 
      * related to the open file chooser.
@@ -227,8 +217,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         showPreviewBorderToggle.setSelected(config.isPreviewBorderShown(
                 showPreviewBorderToggle.isSelected()));
         scaleImageAlwaysToggle.setSelected(config.isImageAlwaysScaled());
+        formatImageCombo.setSelectedIndex(config.getImageFormatting());
         try{    
-            setComboIndexFromConfig(IMAGE_FORMAT_SETTING_KEY,formatImageCombo);
             setComboIndexFromConfig(SCALE_IMAGE_SETTING_KEY,scaleCombo);
             circleToggle.setSelected(config.getPreferences().getBoolean(CIRCULAR_ICON_SETTING_KEY, 
                     circleToggle.isSelected()));
@@ -821,7 +811,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     }//GEN-LAST:event_progressDisplayActionPerformed
 
     private void formatImageComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_formatImageComboActionPerformed
-        updateConfigComboIndex(IMAGE_FORMAT_SETTING_KEY,formatImageCombo);
+        config.setImageFormatting(formatImageCombo.getSelectedIndex());
         populateImagePreviews();
     }//GEN-LAST:event_formatImageComboActionPerformed
 
@@ -1039,7 +1029,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     
     private ICOImage getIconImage(int index, int scale, int format){
         return icons.get(index).get((scaleSettings.getOrDefault(index,scale)*
-                (LAST_FORMAT_IMAGE_SETTING+1))+format);
+                (LAST_IMAGE_FORMATTING+1))+format);
     }
     
     private ICOImage getIconImage(int index){
@@ -1232,13 +1222,13 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         double ratio = ((double) Math.min(w, h)) / Math.max(w, h);
         int size = Math.min(w, h);
         switch (format){
-            case(FORMAT_IMAGE_SETTING_SCALED):
+            case(IMAGE_FORMATTING_SCALED):
                 return scaleImage(image,width,height,interpolation);
-            case(FORMAT_IMAGE_SETTING_CROP_DOWN_RIGHT):
+            case(IMAGE_FORMATTING_CROP_DOWN_RIGHT):
                 x = w - size;
                 y = h - size;
                 break;
-            case(FORMAT_IMAGE_SETTING_CROP_CENTER):
+            case(IMAGE_FORMATTING_CROP_CENTER):
                 x = Math.floorDiv(w - size, 2);
                 y = Math.floorDiv(h - size, 2);
                 break;
@@ -1253,24 +1243,24 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                     w = width;
                     h = height;
                 }
-            case(FORMAT_IMAGE_SETTING_CROP_UP_LEFT):
+            case(IMAGE_FORMATTING_CROP_UP_LEFT):
                 x = y = 0;
         }
         switch (format){
-            case(FORMAT_IMAGE_SETTING_CROP_UP_LEFT):
-            case(FORMAT_IMAGE_SETTING_CROP_DOWN_RIGHT):
-            case(FORMAT_IMAGE_SETTING_CROP_CENTER):
+            case(IMAGE_FORMATTING_CROP_UP_LEFT):
+            case(IMAGE_FORMATTING_CROP_DOWN_RIGHT):
+            case(IMAGE_FORMATTING_CROP_CENTER):
                 image = image.getSubimage(x, y, size, size);
                 w = width;
                 h = height;
-            case(FORMAT_IMAGE_SETTING_UP_LEFT):
+            case(IMAGE_FORMATTING_UP_LEFT):
                 x = y = 0;
                 break;
-            case(FORMAT_IMAGE_SETTING_DOWN_RIGHT):
+            case(IMAGE_FORMATTING_DOWN_RIGHT):
                 x = width - w;
                 y = height - h;
                 break;
-            case(FORMAT_IMAGE_SETTING_CENTERED):
+            case(IMAGE_FORMATTING_CENTERED):
             default:
                 x = Math.floorDiv(width - w, 2);
                 y = Math.floorDiv(height - h, 2);
@@ -1388,8 +1378,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                     for (int s = FIRST_SCALE_IMAGE_SETTING; 
                             s <= LAST_SCALE_IMAGE_SETTING; s++){
                         BufferedImage img = formatImages.get(s);
-                        for (int f = FIRST_FORMAT_IMAGE_SETTING; 
-                                f <= LAST_FORMAT_IMAGE_SETTING; f++){
+                        for (int f = FIRST_IMAGE_FORMATTING; 
+                                f <= LAST_IMAGE_FORMATTING; f++){
                             temp.add(processImage(img,dim.width,dim.height,f,s));
                             incrementProgress();
                         }
