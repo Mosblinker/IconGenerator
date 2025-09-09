@@ -723,21 +723,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                         excludedSet.contains(i), compressedSet.contains(i));
         }
         System.out.println();
-        System.out.println("Preference Node: " + config.getPreferences());
-        if (config.getPreferences() != null){    // If the preference node is available
-            try{
-                System.out.println("Preference Node Exists: " + config.getPreferences().nodeExists(""));
-                System.out.println("Preference Keys: " + Arrays.toString(config.getPreferences().keys()));
-                System.out.println("Preferences: ");
-                    // Go through the keys in the preference node
-                for (String key : config.getPreferences().keys()){
-                    System.out.printf("\t%30s = %s%n", key,config.getPreferences().get(key, null));
-                }
-            } catch(IllegalStateException | BackingStoreException ex){
-                System.out.println("Error: " + ex);
-            }
-        }
-        System.out.println();
     }//GEN-LAST:event_printTestButtonActionPerformed
 
     private void activeTestToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_activeTestToggleActionPerformed
