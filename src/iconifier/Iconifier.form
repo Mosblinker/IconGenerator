@@ -11,7 +11,6 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="fileChooserActionPerformed"/>
-        <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="openFCPropertyChange"/>
       </Events>
     </Component>
     <Component class="javax.swing.JFileChooser" name="saveFC">

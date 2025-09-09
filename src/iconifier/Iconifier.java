@@ -118,42 +118,42 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         return new ICOImage(img,info,ICOEncoder.createIconEntry(info));
     }
     
-    private static final int FORMAT_IMAGE_SETTING_SCALED = 0;
+    public static final int IMAGE_FORMATTING_SCALED = 0;
     
-    private static final int FORMAT_IMAGE_SETTING_CENTERED = 1;
+    protected static final int IMAGE_FORMATTING_CENTERED = 1;
     
-    private static final int FORMAT_IMAGE_SETTING_UP_LEFT = 2;
+    protected static final int IMAGE_FORMATTING_UP_LEFT = 2;
     
-    private static final int FORMAT_IMAGE_SETTING_DOWN_RIGHT = 3;
+    protected static final int IMAGE_FORMATTING_DOWN_RIGHT = 3;
     
-    private static final int FORMAT_IMAGE_SETTING_CROP_CENTER = 4;
+    protected static final int IMAGE_FORMATTING_CROP_CENTER = 4;
     
-    private static final int FORMAT_IMAGE_SETTING_CROP_UP_LEFT = 5;
+    protected static final int IMAGE_FORMATTING_CROP_UP_LEFT = 5;
     
-    private static final int FORMAT_IMAGE_SETTING_CROP_DOWN_RIGHT = 6;
+    protected static final int IMAGE_FORMATTING_CROP_DOWN_RIGHT = 6;
     
-    private static final int FIRST_FORMAT_IMAGE_SETTING = FORMAT_IMAGE_SETTING_SCALED;
+    protected static final int FIRST_IMAGE_FORMATTING = IMAGE_FORMATTING_SCALED;
     
-    private static final int LAST_FORMAT_IMAGE_SETTING = FORMAT_IMAGE_SETTING_CROP_DOWN_RIGHT;
+    protected static final int LAST_IMAGE_FORMATTING = IMAGE_FORMATTING_CROP_DOWN_RIGHT;
     
-    private static final int SCALE_IMAGE_SETTING_NEAREST_NEIGHBOR = 0;
+    protected static final int IMAGE_SCALING_NEAREST_NEIGHBOR = 0;
     
-    private static final int SCALE_IMAGE_SETTING_BILINEAR = 1;
+    protected static final int IMAGE_SCALING_BILINEAR = 1;
     
-    private static final int SCALE_IMAGE_SETTING_BICUBIC = 2;
+    protected static final int IMAGE_SCALING_BICUBIC = 2;
     
-    private static final int SCALE_IMAGE_SETTING_SMOOTH = 3;
+    protected static final int IMAGE_SCALING_SMOOTH = 3;
     
-    private static final int SCALE_IMAGE_SETTING_THUMBNAILATOR = 4;
+    protected static final int IMAGE_SCALING_THUMBNAILATOR = 4;
     
-    private static final int FIRST_SCALE_IMAGE_SETTING = SCALE_IMAGE_SETTING_NEAREST_NEIGHBOR;
+    protected static final int FIRST_IMAGE_SCALING = IMAGE_SCALING_NEAREST_NEIGHBOR;
     
-    private static final int LAST_SCALE_IMAGE_SETTING = SCALE_IMAGE_SETTING_THUMBNAILATOR;
+    protected static final int LAST_IMAGE_SCALING = IMAGE_SCALING_THUMBNAILATOR;
     
     private static final int ICONS_GENERATED_COUNT = 
             (DEFAULT_ICON_DIMENSIONS.length * (DEFAULT_BITS_PER_PIXEL.length+1) * 
-            (LAST_FORMAT_IMAGE_SETTING+1) * (LAST_SCALE_IMAGE_SETTING+1)) + 
-            (LAST_SCALE_IMAGE_SETTING+1);
+            (LAST_IMAGE_FORMATTING+1) * (LAST_IMAGE_SCALING+1)) + 
+            (LAST_IMAGE_SCALING+1);
     
     private static final int DEFAULT_BORDER_THICKNESS = 3;
     /**
@@ -162,20 +162,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      */
     private static final String PREFERENCE_NODE_NAME = 
             "milo/icon/gen/IconGenerator";
-    /**
-     * This is the key in the preference node for the progress display setting.
-     */
-    private static final String PROGRESS_DISPLAY_KEY = "DisplayProgress";
-    /**
-     * This is the key in the component-specific preference node for the widths 
-     * of components.
-     */
-    private static final String PREFERENCE_WIDTH_KEY = "WindowWidth";
-    /**
-     * This is the key in the component-specific preference node for the heights 
-     * of components.
-     */
-    private static final String PREFERENCE_HEIGHT_KEY = "WindowHeight";
     /**
      * This is the name of the child preference node used to store values 
      * related to the open file chooser.
@@ -188,31 +174,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      */
     private static final String SAVE_FILE_CHOOSER_PREFERENCE_NODE = 
             "SaveFileChooser";
-    
-    private static final String SHOW_PREVIEW_BORDER_KEY = "ShowPreviewBorder";
-    
-    private static final String SCALE_IMAGE_PREVIEW_KEY = "ScaleImagePreview";
-    
-    private static final String FORMAT_IMAGE_SETTING_KEY = "FormatImage";
-    
-    private static final String SCALE_IMAGE_SETTING_KEY = "ScaleImage";
-    
-    private static final String CIRCULAR_ICON_SETTING_KEY = "CircularIcon";
-    
-    private static final String FEATHERING_SETTING_KEY = "Feathering";
-    
-    private static final String OPEN_FILE_CHOOSER_DIRECTORY_KEY = 
-            "OpenFCCurrentDirectory";
-    /**
-     * This is the key in the preference node for the directory for the save 
-     * file chooser.
-     */
-    private static final String SAVE_FILE_CHOOSER_DIRECTORY_KEY = 
-            "SaveFCCurrentDirectory";
-    
-    private static final String OPEN_FILE_CHOOSER_FILE_FILTER_KEY = 
-            "OpenFCFileFilter";
-    
     /**
      * Creates new form Iconifier
      * @param debugMode
@@ -222,6 +183,12 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         
         setIconImages(generateIconImages(
                 new ImageIcon(this.getClass().getResource(ICON_FILE)).getImage()));
+        
+        try{    // Try to load the settings from the preference node
+            config = new IconifierConfig(Preferences.userRoot().node(PREFERENCE_NODE_NAME));
+        } catch (SecurityException | IllegalStateException ex){
+            System.out.println("Unable to load settings: " +ex);
+        }
         
         imagePreviewModel = new ComboBoxModelList<>();
         
@@ -238,55 +205,25 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         openFC.setFileFilter(ImageExtensions.IMAGE_FILTER);
         saveFC.setFileFilter(ICON_FILTER);
         
-        try{    // Try to load the settings from the preference node
-            config = Preferences.userRoot().node(PREFERENCE_NODE_NAME);
-            int displaySettings = config.getInt(PROGRESS_DISPLAY_KEY, 
-                    progressDisplay.getDisplaySettings());
-            if (displaySettings != 0)
-                progressDisplay.setDisplaySettings(displaySettings);
-            showPreviewBorderToggle.setSelected(config.getBoolean(SHOW_PREVIEW_BORDER_KEY, 
-                    showPreviewBorderToggle.isSelected()));
-            scaleImageAlwaysToggle.setSelected(config.getBoolean(SCALE_IMAGE_PREVIEW_KEY, 
-                    scaleImageAlwaysToggle.isSelected()));
-            setComboIndexFromConfig(FORMAT_IMAGE_SETTING_KEY,formatImageCombo);
-            setComboIndexFromConfig(SCALE_IMAGE_SETTING_KEY,scaleCombo);
-            String dirName = config.get(OPEN_FILE_CHOOSER_DIRECTORY_KEY, null);
-            if (dirName != null){
-                File dir = new File(dirName);
-                if (dir.exists())
-                    openFC.setCurrentDirectory(dir);
-            }
-            dirName = config.get(SAVE_FILE_CHOOSER_DIRECTORY_KEY, null);
-            if (dirName != null){
-                File dir = new File(dirName);
-                if (dir.exists())
-                    saveFC.setCurrentDirectory(dir);
-            }
-            openFC.setPreferredSize(getPreferenceSize(OPEN_FILE_CHOOSER_PREFERENCE_NODE,
-                    openFC.getPreferredSize()));
-            saveFC.setPreferredSize(getPreferenceSize(SAVE_FILE_CHOOSER_PREFERENCE_NODE,
-                    saveFC.getPreferredSize()));
-            Dimension dim = getPreferenceSize(null,getPreferredSize());
-                // Get the minimum size for the program
-            Dimension min = getMinimumSize();
-                // Make sure the width and height are within range
-            dim.width = Math.max(dim.width, min.width);
-            dim.height = Math.max(dim.height, min.height);
-                // Set the size from the node
-            setSize(dim);
-            int filter = config.getInt(OPEN_FILE_CHOOSER_FILE_FILTER_KEY, -1);
-            if (filter >= 0 && filter < openFC.getChoosableFileFilters().length)
-                openFC.setFileFilter(openFC.getChoosableFileFilters()[filter]);
-            circleToggle.setSelected(config.getBoolean(CIRCULAR_ICON_SETTING_KEY, 
-                    circleToggle.isSelected()));
-            featheringSpinner.setValue(Math.max(Math.min(
-                    config.getFloat(FEATHERING_SETTING_KEY, 1.0f), 1.0f), 0.0f));
-        } catch (SecurityException | IllegalStateException ex){
-            config = null;
-            System.out.println("Unable to load settings: " +ex);
-        } catch (IllegalArgumentException ex){
-            System.out.println("Invalid setting: " + ex);
+        config.addFileChooser(openFC, OPEN_FILE_CHOOSER_PREFERENCE_NODE);
+        config.addFileChooser(saveFC, SAVE_FILE_CHOOSER_PREFERENCE_NODE);
+        openFC.addPropertyChangeListener(config.new FileChooserPropertyChangeListener());
+        
+            // Try to load the settings from the preference node
+        int displaySettings = config.getProgressDisplaySetting(progressDisplay.getDisplaySettings());
+        if (displaySettings != 0)
+            progressDisplay.setDisplaySettings(displaySettings);
+        showPreviewBorderToggle.setSelected(config.isPreviewBorderShown(
+                showPreviewBorderToggle.isSelected()));
+        scaleImageAlwaysToggle.setSelected(config.isImageAlwaysScaled());
+        formatImageCombo.setSelectedIndex(config.getImageFormatting());
+        scaleCombo.setSelectedIndex(config.getDefaultImageScaling());
+        circleToggle.setSelected(config.isIconCircular());
+        featheringSpinner.setValue(config.getIconFeathering());
+        for (JFileChooser fc : config.getFileChooserPreferenceMap().keySet()){
+            config.loadFileChooser(fc);
         }
+        config.getProgramBounds(Iconifier.this);
         
         previewBorders = new Border[]{
             BorderFactory.createCompoundBorder(
@@ -346,117 +283,13 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      * preference node.
      */
     private void updateConfigBoolean(String key, AbstractButton toggleButton){
-        if (config != null){        // If the preference node is available
+        if (config.getPreferences() != null){        // If the preference node is available
             try{
-                config.putBoolean(key, toggleButton.isSelected());
+                config.getPreferences().putBoolean(key, toggleButton.isSelected());
             } catch (IllegalStateException ex){ 
                 if (isInDebug())    // If we are in debug mode
                     System.out.println("Error: " + ex);
             }
-        }
-    }
-    
-    private void setComboIndexFromConfig(String key, JComboBox comboBox){
-        if (config != null){        // If the preference node is available
-            try{
-                comboBox.setSelectedIndex(Math.max(Math.min(config.getInt(key, 
-                        comboBox.getSelectedIndex()), comboBox.getItemCount()-1), 0));
-            } catch (IllegalStateException ex){ 
-                if (isInDebug())    // If we are in debug mode
-                    System.out.println("Error: " + ex);
-            }
-        }
-    }
-    /**
-     * This updates the integer value stored at the given key in the program's 
-     * preference node to reflect the selected index for the given combo box.
-     * @param key The key for the value in the preference node to update.
-     * @param comboBox The combo box to get the selected index for
-     */
-    private void updateConfigComboIndex(String key, JComboBox comboBox){
-        if (config != null){        // If the preference node is available
-            try{
-                config.putInt(key, comboBox.getSelectedIndex());
-            } catch (IllegalStateException ex){ 
-                if (isInDebug())    // If we are in debug mode
-                    System.out.println("Error: " + ex);
-            }
-        }
-    }
-    /**
-     * This checks to see if the preference node is available, and if not, 
-     * throws an IllegalStateException.
-     * @throws IllegalStateException If the preference node was not available to 
-     * the program at initialization.
-     */
-    private void checkIfPreferencesIsAvailable(){
-            // If the preference node is not available
-        if (config == null)
-            throw new IllegalStateException("Preference node is not available");
-    }
-    /**
-     * This returns the size mapped to the given key in the preference node, or 
-     * {@code def} if no size is mapped to that key.
-     * @param key The key to get the associated size for.
-     * @param def The default size to use if there is no size associated with 
-     * the given key.
-     * @return The size mapped to the given key, or {@code def} if no size is 
-     * mapped to the given key.
-     * @throws IllegalStateException If the preference node is not available, 
-     * either due to not being available when the program started up or due to 
-     * the preference node being removed.
-     * @throws IllegalArgumentException If the key contains the null control 
-     * character.
-     */
-    private Dimension getPreferenceSize(String key, Dimension def){
-            // Use an empty String if given null
-        key = Objects.requireNonNullElse(key, "");
-            // Check as to whether the preference node is available
-        checkIfPreferencesIsAvailable();
-            // Get the node used to store the size
-        Preferences node = config.node(key);
-            // If both the width and height have not been set
-        if (node.get(PREFERENCE_WIDTH_KEY, null) == null && 
-                node.get(PREFERENCE_HEIGHT_KEY, null) == null)
-            return def;
-           // If the default size is null
-        if (def == null)
-            def = new Dimension(0,0);
-            // Get the width
-        int width = node.getInt(PREFERENCE_WIDTH_KEY, def.width);
-            // Get the height
-        int height = node.getInt(PREFERENCE_HEIGHT_KEY, def.height);
-        return new Dimension(width,height);
-    }
-    /**
-     * This maps the given key to the given size in the preference node. If the 
-     * given size is null, then the key will be removed.
-     * @param key The key to map the size to.
-     * @param size The size to map to the key.
-     * @throws IllegalStateException If the preference node is not available, 
-     * either due to not being available when the program started up or due to 
-     * the preference node being removed.
-     * @throws IllegalArgumentException If the key either contains the null 
-     * control character or is too long to be stored in the preference node. 
-     */
-    private void setPreferenceSize(String key, Dimension size){
-            // Check as to whether the preference node is available
-        checkIfPreferencesIsAvailable();
-            // Use an empty String if given null
-        key = Objects.requireNonNullElse(key, "");
-            // Get the node used to store the size
-        Preferences node = config.node(key);
-            // If the given size is null
-        if (size == null){
-                // Remove the width
-            node.remove(PREFERENCE_WIDTH_KEY);
-                // Remove the height
-            node.remove(PREFERENCE_HEIGHT_KEY);
-        } else {
-                // Set the width
-            node.putInt(PREFERENCE_WIDTH_KEY, size.width);
-                // Set the height
-            node.putInt(PREFERENCE_HEIGHT_KEY, size.height);
         }
     }
     
@@ -519,11 +352,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         openFC.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fileChooserActionPerformed(evt);
-            }
-        });
-        openFC.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                openFCPropertyChange(evt);
             }
         });
 
@@ -872,11 +700,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             file = openFC.getSelectedFile();
         }
         openFC.setPreferredSize(openFC.getSize());
-        if (config != null){
-            setPreferenceSize(OPEN_FILE_CHOOSER_PREFERENCE_NODE,openFC.getSize());
-            config.put(OPEN_FILE_CHOOSER_DIRECTORY_KEY, 
-                    openFC.getCurrentDirectory().toString());
-        }
+        config.storeFileChooser(openFC);
+        config.setSelectedFile(openFC, file);
         if (file != null){
             imgGen = new GenerateImages(file);
             imgGen.execute();
@@ -916,15 +741,15 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                         excludedSet.contains(i), compressedSet.contains(i));
         }
         System.out.println();
-        System.out.println("Preference Node: " + config);
-        if (config != null){    // If the preference node is available
+        System.out.println("Preference Node: " + config.getPreferences());
+        if (config.getPreferences() != null){    // If the preference node is available
             try{
-                System.out.println("Preference Node Exists: " + config.nodeExists(""));
-                System.out.println("Preference Keys: " + Arrays.toString(config.keys()));
+                System.out.println("Preference Node Exists: " + config.getPreferences().nodeExists(""));
+                System.out.println("Preference Keys: " + Arrays.toString(config.getPreferences().keys()));
                 System.out.println("Preferences: ");
                     // Go through the keys in the preference node
-                for (String key : config.keys()){
-                    System.out.printf("\t%30s = %s%n", key,config.get(key, null));
+                for (String key : config.getPreferences().keys()){
+                    System.out.printf("\t%30s = %s%n", key,config.getPreferences().get(key, null));
                 }
             } catch(IllegalStateException | BackingStoreException ex){
                 System.out.println("Error: " + ex);
@@ -943,18 +768,12 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      */
     private void progressDisplayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_progressDisplayActionPerformed
         progressDisplay.updateProgressString(progressBar);
-        if (progressDisplay.isProgressDisplayed() && config != null){
-            try{
-                config.putInt(PROGRESS_DISPLAY_KEY, progressDisplay.getDisplaySettings());
-            } catch (IllegalStateException ex){ 
-                if (isInDebug())    // If we are in debug mode
-                    System.out.println("Error: " + ex);
-            }
-        }
+        if (progressDisplay.isProgressDisplayed())
+            config.setProgressDisplaySetting(progressDisplay.getDisplaySettings());
     }//GEN-LAST:event_progressDisplayActionPerformed
 
     private void formatImageComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_formatImageComboActionPerformed
-        updateConfigComboIndex(FORMAT_IMAGE_SETTING_KEY,formatImageCombo);
+        config.setImageFormatting(formatImageCombo.getSelectedIndex());
         populateImagePreviews();
     }//GEN-LAST:event_formatImageComboActionPerformed
 
@@ -976,7 +795,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     }//GEN-LAST:event_pngCheckBoxActionPerformed
 
     private void scaleComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_scaleComboActionPerformed
-        updateConfigComboIndex(SCALE_IMAGE_SETTING_KEY,scaleCombo);
+        config.setDefaultImageScaling(scaleCombo.getSelectedIndex());
         populateImagePreviews();
     }//GEN-LAST:event_scaleComboActionPerformed
 
@@ -1030,11 +849,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private File openSaveFileChooser(){
         int option = saveFC.showSaveDialog(this);
         saveFC.setPreferredSize(saveFC.getSize());
-        if (config != null){
-            setPreferenceSize(SAVE_FILE_CHOOSER_PREFERENCE_NODE,saveFC.getSize());
-            config.put(SAVE_FILE_CHOOSER_DIRECTORY_KEY, 
-                    saveFC.getCurrentDirectory().toString());
-        }   // If the user wants to save the file
+        config.storeFileChooser(saveFC);
+            // If the user wants to save the file
         if (option == JFileChooser.APPROVE_OPTION)
             return saveFC.getSelectedFile();
         else
@@ -1045,6 +861,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         File file;
         do{
             file = openSaveFileChooser();
+            config.setSelectedFile(saveFC, file);
             if (file == null)
                 return;
             if (ICON_FILTER.equals(saveFC.getFileFilter()) && !ICON_FILTER.accept(file)){
@@ -1090,12 +907,12 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
     private void showPreviewBorderToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showPreviewBorderToggleActionPerformed
         previewLabel.setThumbnailBorder(getPreviewBorder());
-        updateConfigBoolean(SHOW_PREVIEW_BORDER_KEY, showPreviewBorderToggle);
+        config.setPreviewBorderShown(showPreviewBorderToggle.isSelected());
     }//GEN-LAST:event_showPreviewBorderToggleActionPerformed
 
     private void scaleImageAlwaysToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_scaleImageAlwaysToggleActionPerformed
         previewLabel.setImageAlwaysScaled(scaleImageAlwaysToggle.isSelected());
-        updateConfigBoolean(SCALE_IMAGE_PREVIEW_KEY, scaleImageAlwaysToggle);
+        config.setImageAlwaysScaled(scaleImageAlwaysToggle.isSelected());
     }//GEN-LAST:event_scaleImageAlwaysToggleActionPerformed
     /**
      * This returns whether this window is maximized in either the horizontal or 
@@ -1112,38 +929,17 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
             // If the window is not maximized
         if (!isMaximized()){
-            try{    // Set the stored size in the preference node
-                setPreferenceSize(null,getSize());
-            }catch (IllegalStateException ex){ 
-                if (isInDebug())    // If we are in debug mode
-                    System.out.println("Error: " + ex);
-            }
+            config.setProgramBounds(this);
         }
     }//GEN-LAST:event_formComponentResized
 
-    private void openFCPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_openFCPropertyChange
-//        System.out.println(evt);
-        if (config != null && 
-                JFileChooser.FILE_FILTER_CHANGED_PROPERTY.equals(evt.getPropertyName())){
-            FileFilter filter = openFC.getFileFilter();
-            int index = -1;
-            FileFilter[] filters = openFC.getChoosableFileFilters();
-            for (int i = 0; i < filters.length && index < 0; i++){
-                if (Objects.equals(filter, filters[i]))
-                    index = i;
-            }
-            if (index > 0)
-                config.putInt(OPEN_FILE_CHOOSER_FILE_FILTER_KEY, index);
-        }
-    }//GEN-LAST:event_openFCPropertyChange
-
     private void circleToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_circleToggleActionPerformed
-        updateConfigBoolean(CIRCULAR_ICON_SETTING_KEY,circleToggle);
+        config.setIconCircular(circleToggle.isSelected());
     }//GEN-LAST:event_circleToggleActionPerformed
 
     private void featheringSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_featheringSpinnerStateChanged
         float feathering = getFeathering();
-        config.putFloat(FEATHERING_SETTING_KEY, feathering);
+        config.setIconFeathering(feathering);
     }//GEN-LAST:event_featheringSpinnerStateChanged
     
     private float getFeathering(){
@@ -1195,7 +991,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     
     private ICOImage getIconImage(int index, int scale, int format){
         return icons.get(index).get((scaleSettings.getOrDefault(index,scale)*
-                (LAST_FORMAT_IMAGE_SETTING+1))+format);
+                (LAST_IMAGE_FORMATTING+1))+format);
     }
     
     private ICOImage getIconImage(int index){
@@ -1229,7 +1025,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private Set<Integer> excludedSet = new TreeSet<>();
     private Set<Integer> compressedSet = new TreeSet<>();
     private Border[] previewBorders = null;
-    private Preferences config;
+    private IconifierConfig config;
     private boolean active = true;
     private final boolean debugMode;
     private GenerateImages imgGen = null;
@@ -1335,10 +1131,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
                 RenderingHints.VALUE_ANTIALIAS_ON);
         switch(interpolation){
-            case(SCALE_IMAGE_SETTING_SMOOTH):
+            case(IMAGE_SCALING_SMOOTH):
                 drawn = image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
                 break;
-            case(SCALE_IMAGE_SETTING_THUMBNAILATOR):
+            case(IMAGE_SCALING_THUMBNAILATOR):
                 try {
                     drawn = Thumbnails.of(image).size(w, h).asBufferedImage();
                     break;
@@ -1350,13 +1146,13 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             default:
                 Object interValue;
                 switch(interpolation){
-                    case(SCALE_IMAGE_SETTING_NEAREST_NEIGHBOR):
+                    case(IMAGE_SCALING_NEAREST_NEIGHBOR):
                         interValue = RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
                         break;
-                    case(SCALE_IMAGE_SETTING_BILINEAR):
+                    case(IMAGE_SCALING_BILINEAR):
                         interValue = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
                         break;
-                    case(SCALE_IMAGE_SETTING_BICUBIC):
+                    case(IMAGE_SCALING_BICUBIC):
                     default:
                         interValue = RenderingHints.VALUE_INTERPOLATION_BICUBIC;
                 }
@@ -1388,13 +1184,13 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         double ratio = ((double) Math.min(w, h)) / Math.max(w, h);
         int size = Math.min(w, h);
         switch (format){
-            case(FORMAT_IMAGE_SETTING_SCALED):
+            case(IMAGE_FORMATTING_SCALED):
                 return scaleImage(image,width,height,interpolation);
-            case(FORMAT_IMAGE_SETTING_CROP_DOWN_RIGHT):
+            case(IMAGE_FORMATTING_CROP_DOWN_RIGHT):
                 x = w - size;
                 y = h - size;
                 break;
-            case(FORMAT_IMAGE_SETTING_CROP_CENTER):
+            case(IMAGE_FORMATTING_CROP_CENTER):
                 x = Math.floorDiv(w - size, 2);
                 y = Math.floorDiv(h - size, 2);
                 break;
@@ -1409,24 +1205,24 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                     w = width;
                     h = height;
                 }
-            case(FORMAT_IMAGE_SETTING_CROP_UP_LEFT):
+            case(IMAGE_FORMATTING_CROP_UP_LEFT):
                 x = y = 0;
         }
         switch (format){
-            case(FORMAT_IMAGE_SETTING_CROP_UP_LEFT):
-            case(FORMAT_IMAGE_SETTING_CROP_DOWN_RIGHT):
-            case(FORMAT_IMAGE_SETTING_CROP_CENTER):
+            case(IMAGE_FORMATTING_CROP_UP_LEFT):
+            case(IMAGE_FORMATTING_CROP_DOWN_RIGHT):
+            case(IMAGE_FORMATTING_CROP_CENTER):
                 image = image.getSubimage(x, y, size, size);
                 w = width;
                 h = height;
-            case(FORMAT_IMAGE_SETTING_UP_LEFT):
+            case(IMAGE_FORMATTING_UP_LEFT):
                 x = y = 0;
                 break;
-            case(FORMAT_IMAGE_SETTING_DOWN_RIGHT):
+            case(IMAGE_FORMATTING_DOWN_RIGHT):
                 x = width - w;
                 y = height - h;
                 break;
-            case(FORMAT_IMAGE_SETTING_CENTERED):
+            case(IMAGE_FORMATTING_CENTERED):
             default:
                 x = Math.floorDiv(width - w, 2);
                 y = Math.floorDiv(height - h, 2);
@@ -1527,8 +1323,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 }
             }
             
-            for (int s = FIRST_SCALE_IMAGE_SETTING; 
-                    s <= LAST_SCALE_IMAGE_SETTING; s++){
+            for (int s = FIRST_IMAGE_SCALING; 
+                    s <= LAST_IMAGE_SCALING; s++){
                 if (tooLarge){
                     formatImages.add(scaleImage(image,w,h,s));
                 } else
@@ -1541,11 +1337,11 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
                 for (Dimension dim : DEFAULT_ICON_DIMENSIONS) {
                     ArrayList<BufferedImage> temp = new ArrayList<>();
-                    for (int s = FIRST_SCALE_IMAGE_SETTING; 
-                            s <= LAST_SCALE_IMAGE_SETTING; s++){
+                    for (int s = FIRST_IMAGE_SCALING; 
+                            s <= LAST_IMAGE_SCALING; s++){
                         BufferedImage img = formatImages.get(s);
-                        for (int f = FIRST_FORMAT_IMAGE_SETTING; 
-                                f <= LAST_FORMAT_IMAGE_SETTING; f++){
+                        for (int f = FIRST_IMAGE_FORMATTING; 
+                                f <= LAST_IMAGE_FORMATTING; f++){
                             temp.add(processImage(img,dim.width,dim.height,f,s));
                             incrementProgress();
                         }
