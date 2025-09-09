@@ -715,10 +715,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             System.out.println((max-sourceImage.getWidth()) + " x " + (max-sourceImage.getHeight()));
         }
         
-        if (icons != null){
-            for (int i = 0; i < icons.size(); i++){
-                for (int j = 0; j < icons.get(i).size(); j++){
-                    ICOImage img = icons.get(i).get(j);
+        if (iconsOld != null){
+            for (int i = 0; i < iconsOld.size(); i++){
+                for (int j = 0; j < iconsOld.get(i).size(); j++){
+                    ICOImage img = iconsOld.get(i).get(j);
                     System.out.printf("\t(%3d %3d) %3d: (%3d x %3d) %2d (%5b) %5b (%2d %5b %5b)%n",
                             i, j, 
                             img.getIconIndex(), img.getWidth(), img.getHeight(),
@@ -772,7 +772,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     }//GEN-LAST:event_useDebugIconToggleActionPerformed
 
     private void pngCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pngCheckBoxActionPerformed
-        for (ICOImage img : icons.get(previewComboBox.getSelectedIndex())){
+        for (ICOImage img : iconsOld.get(previewComboBox.getSelectedIndex())){
             img.setPngCompressed(pngCheckBox.isSelected());
         }
         previewComboBox.repaint();
@@ -803,11 +803,11 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             excludedSet.add(selected);
             diff = -1;
         }
-        for (ICOImage img : icons.get(selected)){
+        for (ICOImage img : iconsOld.get(selected)){
             img.setIconIndex(index);
         }
-        for (int i = selected+1; i < icons.size(); i++){
-            for (ICOImage img : icons.get(i)){
+        for (int i = selected+1; i < iconsOld.size(); i++){
+            for (ICOImage img : iconsOld.get(i)){
                 int j = img.getIconIndex();
                 if (j >= 0)
                     img.setIconIndex(Math.max(j+diff,0));
@@ -1016,7 +1016,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     }
     
     private ICOImage getIconImage(int index, int scale, int format){
-        return icons.get(index).get((scaleSettings.getOrDefault(index,scale)*
+        return iconsOld.get(index).get((scaleSettings.getOrDefault(index,scale)*
                 (LAST_IMAGE_FORMATTING+1))+format);
     }
     
@@ -1027,11 +1027,11 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private void populateImagePreviews(){
         int selected = imagePreviewModel.indexOf(imagePreviewModel.getSelectedItem());
         imagePreviewModel.clear();
-        if (icons == null)
+        if (iconsOld == null)
             return;
         int scale = scaleCombo.getSelectedIndex();
         int format = formatImageCombo.getSelectedIndex();
-        for (int i = 0; i < icons.size(); i++){
+        for (int i = 0; i < iconsOld.size(); i++){
             imagePreviewModel.add(getIconImage(i,scale,format));
         }
         if (selected < 0)
@@ -1046,7 +1046,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      * First list is the icon index, second list is the scale setting, third 
      * list is image formatting.
      */
-    private ArrayList<ArrayList<ICOImage>> icons = null;
+    private ArrayList<ArrayList<ICOImage>> iconsOld = null;
     private Map<Integer, Integer> scaleSettings = new TreeMap<>();
     private Set<Integer> excludedSet = new TreeSet<>();
     private Set<Integer> compressedSet = new TreeSet<>();
@@ -1420,7 +1420,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 }
             } else {
                 sourceImage = image;
-                icons = newIcons;
+                iconsOld = newIcons;
                 compressedSet.clear();
                 compressedSet.addAll(DEFAULT_AUTO_COMPRESSED_INDEXES);
                 excludedSet.clear();
