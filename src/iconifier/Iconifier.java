@@ -121,9 +121,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     protected static final int LAST_IMAGE_SCALING = IMAGE_SCALING_THUMBNAILATOR;
     
     private static final int ICONS_GENERATED_COUNT = 
-            (DEFAULT_ICON_DIMENSIONS.length * (DEFAULT_BITS_PER_PIXEL.length+1) * 
-            (LAST_IMAGE_FORMATTING+1) * (LAST_IMAGE_SCALING+1)) + 
-            (LAST_IMAGE_SCALING+1);
+            DEFAULT_ICON_DIMENSIONS.length*(DEFAULT_BITS_PER_PIXEL.length+1);
     
     private static final int DEFAULT_BORDER_THICKNESS = 3;
     /**
@@ -1349,7 +1347,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             }
             int defScaling = scaleCombo.getSelectedIndex();
             
-            progressBar.setMaximum(DEFAULT_ICON_DIMENSIONS.length*(DEFAULT_BITS_PER_PIXEL.length+1));
+            progressBar.setMaximum(ICONS_GENERATED_COUNT);
             progressBar.setValue(0);
             progressBar.setIndeterminate(false);
             
