@@ -895,7 +895,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
     private void circleToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_circleToggleActionPerformed
         config.setIconCircular(circleToggle.isSelected());
-        imgGen = new GenerateImages1(sourceImage);
+        imgGen = new GenerateImages1(sourceImage,getSelectedImageIndex());
         imgGen.execute();
     }//GEN-LAST:event_circleToggleActionPerformed
     
@@ -995,6 +995,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     
     private ICOImage getIconImage(int index){
         return getIconImage(index,scaleCombo.getSelectedIndex(),formatImageCombo.getSelectedIndex());
+    }
+    
+    private int getSelectedImageIndex(){
+        return imagePreviewModel.indexOf(imagePreviewModel.getSelectedItem());
     }
     
     private void populateImagePreviews(){
@@ -1278,8 +1282,25 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         return ICOEncoder.convert(image, bpp);
     }
     
+    private BufferedImage getMaskImage(int width, int height, int bpp){
+        BufferedImage mask = new BufferedImage(width,height,
+                BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = mask.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+                (bpp==32)?RenderingHints.VALUE_ANTIALIAS_ON:
+                        RenderingHints.VALUE_ANTIALIAS_OFF);
+        g.fillOval(0, 0, width, height);
+        g.dispose();
+        return mask;
+    }
+    
     private ICOImage createICOImage(BufferedImage image, int index, int bpp, 
             boolean compressed){
+        if (circleToggle.isSelected()){
+            Graphics2D g = image.createGraphics();
+            maskImage(g,getMaskImage(image.getWidth(),image.getHeight(),bpp));
+            g.dispose();
+        }
         ICOImage icon = createICOImage(convertColorDepth(image,bpp));
         icon.setIconIndex(index);
         icon.setPngCompressed(compressed);
