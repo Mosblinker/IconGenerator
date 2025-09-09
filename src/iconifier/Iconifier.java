@@ -752,8 +752,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             compressedSet.add(previewComboBox.getSelectedIndex());
         else
             compressedSet.remove(previewComboBox.getSelectedIndex());
-        if (imagePreviewModel.getSelectedItem() instanceof ICOImage)
-            ((ICOImage)imagePreviewModel.getSelectedItem()).setPngCompressed(pngCheckBox.isSelected());
+        getSelectedImage().setPngCompressed(pngCheckBox.isSelected());
         if (iconsOld != null){
             for (ICOImage img : iconsOld.get(previewComboBox.getSelectedIndex())){
                 img.setPngCompressed(pngCheckBox.isSelected());
@@ -787,14 +786,22 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             excludedSet.add(selected);
             diff = -1;
         }
-        for (ICOImage img : iconsOld.get(selected)){
-            img.setIconIndex(index);
+        imagePreviewModel.get(selected).setIconIndex(index);
+        for (int i = selected+1; i < imagePreviewModel.size(); i++){
+            ICOImage img = imagePreviewModel.get(i);
+            if (img.getIconIndex() >= 0)
+                img.setIconIndex(Math.max(img.getIconIndex()+diff,0));
         }
-        for (int i = selected+1; i < iconsOld.size(); i++){
-            for (ICOImage img : iconsOld.get(i)){
-                int j = img.getIconIndex();
-                if (j >= 0)
-                    img.setIconIndex(Math.max(j+diff,0));
+        if (iconsOld != null){
+            for (ICOImage img : iconsOld.get(selected)){
+                img.setIconIndex(index);
+            }
+            for (int i = selected+1; i < iconsOld.size(); i++){
+                for (ICOImage img : iconsOld.get(i)){
+                    int j = img.getIconIndex();
+                    if (j >= 0)
+                        img.setIconIndex(Math.max(j+diff,0));
+                }
             }
         }
         previewComboBox.repaint();
