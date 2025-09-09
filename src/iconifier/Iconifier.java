@@ -1126,7 +1126,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 break;
             case(IMAGE_SCALING_THUMBNAILATOR):
                 try {
-                    drawn = Thumbnails.of(image).size(w, h).asBufferedImage();//Thumbnailator.createThumbnail(image,width,height);
+                    drawn = Thumbnails.of(image).forceSize(width, height).asBufferedImage();
                     break;
                 } catch (IOException ex) {
                     getLogger().log(Level.WARNING, "Thumbnailator Error", ex);
