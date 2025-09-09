@@ -22,6 +22,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -968,6 +969,37 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+            // Set the logger's level to the lowest level in order to log all
+        getLogger().setLevel(Level.FINEST);
+        try {   // Get the parent file for the log file
+            File file = new File(PROGRAM_LOG_PATTERN.replace("%h", 
+                    System.getProperty("user.home"))
+                    .replace('/', File.separatorChar)).getParentFile();
+                // If the parent of the log file doesn't exist
+            if (!file.exists()){
+                try{    // Try to create the directories for the log file
+                    Files.createDirectories(file.toPath());
+                } catch (IOException ex){
+                    getLogger().log(Level.WARNING, 
+                            "Failed to create directories for log file", ex);
+                }
+            }   // Add a file handler to log messages to a log file
+            getLogger().addHandler(new java.util.logging.FileHandler(
+                    PROGRAM_LOG_PATTERN,0,8));
+        } catch (IOException | SecurityException ex) {
+            getLogger().log(Level.SEVERE, "Failed to get log file", ex);
+        }   // Log the user's OS name
+        getLogger().log(Level.CONFIG, "OS: {0}, version: {1}, arch: {2}", new Object[]{
+                System.getProperty("os.name"),
+                System.getProperty("os.version"),
+                System.getProperty("os.arch")});
+            // Log the Java vendor name and url
+        getLogger().log(Level.CONFIG, "Java vendor: {0}, URL: {1}", new Object[]{
+                System.getProperty("java.vendor"),
+                System.getProperty("java.vendor.url")});
+            // Log the Java version
+        getLogger().log(Level.CONFIG, "Java version: {0}", 
+                System.getProperty("java.version"));
         /* Set the System Look and Feel look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If System is not available, stay with the default look and feel.
