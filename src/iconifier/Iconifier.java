@@ -22,6 +22,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.imageio.ImageIO;
@@ -174,6 +175,23 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      */
     private static final String SAVE_FILE_CHOOSER_PREFERENCE_NODE = 
             "SaveFileChooser";
+    /**
+     * This is the pattern for the file handler to use for the log files of this 
+     * program.
+     */
+    private static final String PROGRAM_LOG_PATTERN = 
+            "%h/.mosblinker/logs/IconGenerator-%u.%g.log";
+    /**
+     * 
+     */
+    private static final Logger LOGGER = Logger.getLogger("IconGenerator");
+    /**
+     * 
+     * @return 
+     */
+    public static Logger getLogger(){
+        return LOGGER;
+    }
     /**
      * Creates new form Iconifier
      * @param debugMode
