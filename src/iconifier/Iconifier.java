@@ -1307,20 +1307,165 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         return icon;
     }
     
-//    private class GenerateImages extends SwingWorker<Void, Void>{
-//        
-//        private final File file;
-//        
-//        private BufferedImage image;
-//        
-//        private final ArrayList<ICOImage>> newIcons 
-//
-//        @Override
-//        protected Void doInBackground() throws Exception {
-//            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-//        }
-//        
-//    }
+    private class GenerateImages extends SwingWorker<Void, Void>{
+        
+        private final File file;
+        
+        private BufferedImage image;
+        
+        private final ArrayList<ICOImage> newIcons = new ArrayList<>();
+        
+        private IOException fileExc = null;
+        
+        private Exception exc = null;
+        
+        private volatile boolean loading = false;
+        
+        private volatile boolean success = false;
+        
+        private Integer selected;
+        
+        GenerateImages(File file, Integer selected){
+            this.file = Objects.requireNonNull(file);
+            image = null;
+            this.selected = selected;
+        }
+        
+        GenerateImages(File file){
+            this(file,null);
+        }
+        
+        GenerateImages(BufferedImage image, Integer selected){
+            this.image = Objects.requireNonNull(image);
+            file = null;
+            this.selected = selected;
+        }
+        
+        GenerateImages(BufferedImage image){
+            this(image,null);
+        }
+        
+        public synchronized boolean isLoading(){
+            return loading;
+        }
+        
+        public synchronized boolean isSuccessful(){
+            return success;
+        }
+        
+        private BufferedImage loadImage(File file){
+            getLogger().entering(this.getClass().getName(), "loadImage", file);
+            progressBar.setIndeterminate(true);
+            progressDisplay.setString("Loading Image From File");
+            try {
+                BufferedImage image = ImageIO.read(file);
+                if (image.getType() != BufferedImage.TYPE_INT_ARGB){
+                    BufferedImage temp = image;
+                    image = new BufferedImage(temp.getWidth(),temp.getHeight(),
+                            BufferedImage.TYPE_INT_ARGB);
+                    Graphics2D g = image.createGraphics();
+                    g.drawImage(temp, 0, 0, null);
+                    g.dispose();
+                }
+                getLogger().exiting(this.getClass().getName(), "loadImage", image);
+                return image;
+            } catch (IOException ex) {
+                getLogger().log(Level.WARNING, "Error loading file", ex);
+                fileExc = ex;
+                getLogger().exiting(this.getClass().getName(), "loadImage", null);
+                return null;
+            }
+        }
+        @Override
+        protected Void doInBackground() throws Exception {
+            getLogger().entering(this.getClass().getName(), "doInBackground");
+            setInputEnabled(false);
+            progressBar.setValue(0);
+            progressBar.setStringPainted(true);
+            loading = true;
+            if (file != null){
+                image = loadImage(file);
+            }
+            if (image == null){
+                getLogger().exiting(this.getClass().getName(), "doInBackground");
+                return null;
+            }
+            progressDisplay.setString("Generating Icon Images");
+            
+            int format = formatImageCombo.getSelectedIndex();
+            Map<Integer,Integer> scaling = new HashMap<>();
+            if (selected != null)
+                scaling.putAll(scaleSettings);
+            int defScaling = scaleCombo.getSelectedIndex();
+            
+            progressBar.setMaximum(DEFAULT_ICON_DIMENSIONS.length*(DEFAULT_BITS_PER_PIXEL.length+1));
+            progressBar.setValue(0);
+            progressBar.setIndeterminate(false);
+            
+            try{
+                ArrayList<BufferedImage> images = new ArrayList<>();
+                for (int i = 0; i < DEFAULT_ICON_DIMENSIONS.length; i++){
+                    Dimension dim = DEFAULT_ICON_DIMENSIONS[i];
+                    images.add(processImage(image,dim.width,dim.height,
+                            format,scaling.getOrDefault(i, defScaling)));
+                    incrementProgress();
+                }
+
+                for (int d : DEFAULT_BITS_PER_PIXEL){
+                    for (BufferedImage img : images){
+                        newIcons.add(createICOImage(img,newIcons.size(),d,
+                                img.getWidth() >= AUTO_COMPRESS_SIZE.width || 
+                                        img.getHeight() >= AUTO_COMPRESS_SIZE.height));
+                        incrementProgress();
+                    }
+                }
+                success = true;
+            } catch (Exception ex){
+                getLogger().log(Level.WARNING, "Error creating images", ex);
+                exc = ex;
+            }
+            getLogger().exiting(this.getClass().getName(), "doInBackground");
+            return null;
+        }
+        @Override
+        protected void done(){
+            loading = false;
+            if (!success){
+                if (fileExc != null){
+                    JOptionPane.showMessageDialog(Iconifier.this, 
+                            "An error occurred while attempting to load the image from the file.\n\nError: "+fileExc, 
+                            "Error Loading Image", JOptionPane.ERROR_MESSAGE);
+                } else if (exc != null){
+                    JOptionPane.showMessageDialog(Iconifier.this, 
+                            "An error occurred while attempting generate the icon images.\n\nError: "+exc, 
+                            "Error Generating Images", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(Iconifier.this, 
+                            "An unknown error occurred while attempting to load the image.",
+                            "Error Loading Images", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                sourceImage = image;
+                if (selected == null){
+                    compressedSet.clear();
+                    compressedSet.addAll(DEFAULT_AUTO_COMPRESSED_INDEXES);
+                    excludedSet.clear();
+                    scaleSettings.clear();
+                    imagePreviewModel.setSelectedItem(null);
+                    selected = newIcons.size()-1;
+                }
+                imagePreviewModel.clear();
+                imagePreviewModel.addAll(newIcons);
+                imagePreviewModel.setSelectedItem(imagePreviewModel.get(Math.min(
+                        Math.max(selected, 0), imagePreviewModel.size()-1)));
+
+            }
+            progressBar.setIndeterminate(false);
+            progressBar.setStringPainted(false);
+            progressBar.setValue(0);
+            setInputEnabled(true);
+        }
+    }
     
     private class GenerateImages1 extends SwingWorker<Void, Void>{
         
