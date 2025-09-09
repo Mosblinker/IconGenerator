@@ -41,7 +41,7 @@ public class IconifierConfig {
     
     public static final String IMAGE_FORMATTING_KEY = "ImageFormatting";
     
-    public static final String SCALE_IMAGE_SETTING_KEY = "ScaleImage";
+    public static final String DEFAULT_IMAGE_SCALING_KEY = "DefaultImageScaling";
     
     public static final String CIRCULAR_ICON_SETTING_KEY = "CircularIcon";
     
@@ -477,6 +477,30 @@ public class IconifierConfig {
      */
     public void setImageFormatting(int value){
         getPreferences().putInt(IMAGE_FORMATTING_KEY, value);
+    }
+    /**
+     * 
+     * @param defaultValue
+     * @return 
+     */
+    public int getDefaultImageScaling(int defaultValue){
+        return Math.min(Math.max(getPreferences().getInt(DEFAULT_IMAGE_SCALING_KEY,
+                defaultValue), Iconifier.FIRST_IMAGE_SCALING),
+                Iconifier.LAST_IMAGE_SCALING);
+    }
+    /**
+     * 
+     * @return 
+     */
+    public int getDefaultImageScaling(){
+        return getDefaultImageScaling(Iconifier.IMAGE_SCALING_THUMBNAILATOR);
+    }
+    /**
+     * 
+     * @param value 
+     */
+    public void setDefaultImageScaling(int value){
+        getPreferences().putInt(DEFAULT_IMAGE_SCALING_KEY, value);
     }
     /**
      * 

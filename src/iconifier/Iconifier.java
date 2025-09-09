@@ -137,24 +137,24 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     
     protected static final int LAST_IMAGE_FORMATTING = IMAGE_FORMATTING_CROP_DOWN_RIGHT;
     
-    private static final int SCALE_IMAGE_SETTING_NEAREST_NEIGHBOR = 0;
+    protected static final int IMAGE_SCALING_NEAREST_NEIGHBOR = 0;
     
-    private static final int SCALE_IMAGE_SETTING_BILINEAR = 1;
+    protected static final int IMAGE_SCALING_BILINEAR = 1;
     
-    private static final int SCALE_IMAGE_SETTING_BICUBIC = 2;
+    protected static final int IMAGE_SCALING_BICUBIC = 2;
     
-    private static final int SCALE_IMAGE_SETTING_SMOOTH = 3;
+    protected static final int IMAGE_SCALING_SMOOTH = 3;
     
-    private static final int SCALE_IMAGE_SETTING_THUMBNAILATOR = 4;
+    protected static final int IMAGE_SCALING_THUMBNAILATOR = 4;
     
-    private static final int FIRST_SCALE_IMAGE_SETTING = SCALE_IMAGE_SETTING_NEAREST_NEIGHBOR;
+    protected static final int FIRST_IMAGE_SCALING = IMAGE_SCALING_NEAREST_NEIGHBOR;
     
-    private static final int LAST_SCALE_IMAGE_SETTING = SCALE_IMAGE_SETTING_THUMBNAILATOR;
+    protected static final int LAST_IMAGE_SCALING = IMAGE_SCALING_THUMBNAILATOR;
     
     private static final int ICONS_GENERATED_COUNT = 
             (DEFAULT_ICON_DIMENSIONS.length * (DEFAULT_BITS_PER_PIXEL.length+1) * 
-            (LAST_IMAGE_FORMATTING+1) * (LAST_SCALE_IMAGE_SETTING+1)) + 
-            (LAST_SCALE_IMAGE_SETTING+1);
+            (LAST_IMAGE_FORMATTING+1) * (LAST_IMAGE_SCALING+1)) + 
+            (LAST_IMAGE_SCALING+1);
     
     private static final int DEFAULT_BORDER_THICKNESS = 3;
     /**
@@ -218,8 +218,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 showPreviewBorderToggle.isSelected()));
         scaleImageAlwaysToggle.setSelected(config.isImageAlwaysScaled());
         formatImageCombo.setSelectedIndex(config.getImageFormatting());
-        try{    
-            setComboIndexFromConfig(SCALE_IMAGE_SETTING_KEY,scaleCombo);
+        scaleCombo.setSelectedIndex(config.getDefaultImageScaling());
+        try{
             circleToggle.setSelected(config.getPreferences().getBoolean(CIRCULAR_ICON_SETTING_KEY, 
                     circleToggle.isSelected()));
             featheringSpinner.setValue(Math.max(Math.min(
@@ -296,34 +296,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         if (config.getPreferences() != null){        // If the preference node is available
             try{
                 config.getPreferences().putBoolean(key, toggleButton.isSelected());
-            } catch (IllegalStateException ex){ 
-                if (isInDebug())    // If we are in debug mode
-                    System.out.println("Error: " + ex);
-            }
-        }
-    }
-    
-    private void setComboIndexFromConfig(String key, JComboBox comboBox){
-        if (config.getPreferences() != null){        // If the preference node is available
-            try{
-                comboBox.setSelectedIndex(Math.max(Math.min(config.getPreferences().getInt(key, 
-                        comboBox.getSelectedIndex()), comboBox.getItemCount()-1), 0));
-            } catch (IllegalStateException ex){ 
-                if (isInDebug())    // If we are in debug mode
-                    System.out.println("Error: " + ex);
-            }
-        }
-    }
-    /**
-     * This updates the integer value stored at the given key in the program's 
-     * preference node to reflect the selected index for the given combo box.
-     * @param key The key for the value in the preference node to update.
-     * @param comboBox The combo box to get the selected index for
-     */
-    private void updateConfigComboIndex(String key, JComboBox comboBox){
-        if (config.getPreferences() != null){        // If the preference node is available
-            try{
-                config.getPreferences().putInt(key, comboBox.getSelectedIndex());
             } catch (IllegalStateException ex){ 
                 if (isInDebug())    // If we are in debug mode
                     System.out.println("Error: " + ex);
@@ -833,7 +805,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     }//GEN-LAST:event_pngCheckBoxActionPerformed
 
     private void scaleComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_scaleComboActionPerformed
-        updateConfigComboIndex(SCALE_IMAGE_SETTING_KEY,scaleCombo);
+        config.setDefaultImageScaling(scaleCombo.getSelectedIndex());
         populateImagePreviews();
     }//GEN-LAST:event_scaleComboActionPerformed
 
@@ -1169,10 +1141,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
                 RenderingHints.VALUE_ANTIALIAS_ON);
         switch(interpolation){
-            case(SCALE_IMAGE_SETTING_SMOOTH):
+            case(IMAGE_SCALING_SMOOTH):
                 drawn = image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
                 break;
-            case(SCALE_IMAGE_SETTING_THUMBNAILATOR):
+            case(IMAGE_SCALING_THUMBNAILATOR):
                 try {
                     drawn = Thumbnails.of(image).size(w, h).asBufferedImage();
                     break;
@@ -1184,13 +1156,13 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             default:
                 Object interValue;
                 switch(interpolation){
-                    case(SCALE_IMAGE_SETTING_NEAREST_NEIGHBOR):
+                    case(IMAGE_SCALING_NEAREST_NEIGHBOR):
                         interValue = RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
                         break;
-                    case(SCALE_IMAGE_SETTING_BILINEAR):
+                    case(IMAGE_SCALING_BILINEAR):
                         interValue = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
                         break;
-                    case(SCALE_IMAGE_SETTING_BICUBIC):
+                    case(IMAGE_SCALING_BICUBIC):
                     default:
                         interValue = RenderingHints.VALUE_INTERPOLATION_BICUBIC;
                 }
@@ -1361,8 +1333,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 }
             }
             
-            for (int s = FIRST_SCALE_IMAGE_SETTING; 
-                    s <= LAST_SCALE_IMAGE_SETTING; s++){
+            for (int s = FIRST_IMAGE_SCALING; 
+                    s <= LAST_IMAGE_SCALING; s++){
                 if (tooLarge){
                     formatImages.add(scaleImage(image,w,h,s));
                 } else
@@ -1375,8 +1347,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
                 for (Dimension dim : DEFAULT_ICON_DIMENSIONS) {
                     ArrayList<BufferedImage> temp = new ArrayList<>();
-                    for (int s = FIRST_SCALE_IMAGE_SETTING; 
-                            s <= LAST_SCALE_IMAGE_SETTING; s++){
+                    for (int s = FIRST_IMAGE_SCALING; 
+                            s <= LAST_IMAGE_SCALING; s++){
                         BufferedImage img = formatImages.get(s);
                         for (int f = FIRST_IMAGE_FORMATTING; 
                                 f <= LAST_IMAGE_FORMATTING; f++){
