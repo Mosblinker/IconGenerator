@@ -1219,13 +1219,15 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private BufferedImage convertColorDepth(BufferedImage image, int bpp){
         if (bpp == 24)
             return ConvertUtil.convert24(image);
-        // For bit depths less than 32, determine an alpha color and then swap 
-        // that color out for transparancy. This would perferably be a color 
-        // that is unused in the image. Additionally, for bit depths less than 
-        // 24, perhaps this should generate a best fitting color map. 
+        // TODO: For bit depths less than 32, determine an alpha color and then 
+        // swap that color out for transparancy. This would perferably be a 
+        // color that is unused in the image. Additionally, for bit depths less 
+        // than 24, perhaps this should generate a best fitting color map. 
         // Also, the alpha color and color map should be customizable by the user
         return ICOEncoder.convert(image, bpp);
     }
+    
+    
     
     private class GenerateImages1 extends SwingWorker<Void, Void>{
         
