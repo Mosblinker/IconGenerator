@@ -987,14 +987,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         scaleOverrideCombo.setSelectedIndex(scaleSettings.getOrDefault(selected, -1)+1);
     }
     
-    private ICOImage getIconImage(int index, int scale, int format){
-        return iconsOld.get(index).get((scaleSettings.getOrDefault(index,scale)*
-                (LAST_IMAGE_FORMATTING+1))+format);
-    }
     
-    private ICOImage getIconImage(int index){
-        return getIconImage(index,scaleCombo.getSelectedIndex(),formatImageCombo.getSelectedIndex());
-    }
     
     private ICOImage getSelectedImage(){
         if (imagePreviewModel.getSelectedItem() instanceof ICOImage)
@@ -1006,29 +999,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         return imagePreviewModel.indexOf(imagePreviewModel.getSelectedItem());
     }
     
-    private void populateImagePreviews(){
-        int selected = getSelectedImageIndex();
-        imagePreviewModel.clear();
-        if (iconsOld == null)
-            return;
-        int scale = scaleCombo.getSelectedIndex();
-        int format = formatImageCombo.getSelectedIndex();
-        for (int i = 0; i < iconsOld.size(); i++){
-            imagePreviewModel.add(getIconImage(i,scale,format));
-        }
-        if (selected < 0)
-            selected = imagePreviewModel.size()-1;
-        imagePreviewModel.setSelectedItem(imagePreviewModel.get(selected));
-    }
     
     private BufferedImage sourceImage = null;
     private DebuggingIcon debugIcon = null;
     private ComboBoxModelList<ICOImage> imagePreviewModel;
-    /**
-     * First list is the icon index, second list is the scale setting, third 
-     * list is image formatting.
-     */
-    private ArrayList<ArrayList<ICOImage>> iconsOld = null;
     private Map<Integer, Integer> scaleSettings = new TreeMap<>();
     private Set<Integer> excludedSet = new TreeSet<>();
     private Set<Integer> compressedSet = new TreeSet<>();
@@ -1036,7 +1010,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private IconifierConfig config;
     private boolean active = true;
     private final boolean debugMode;
-    private GenerateImages1 imgGen1 = null;
     private GenerateImages imgGen = null;
     private SaveIconImages saver = null;
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1485,185 +1458,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         }
     }
     
-    private class GenerateImages1 extends SwingWorker<Void, Void>{
-        
-        private final File file;
-        
-        private BufferedImage image;
-        
-        private final ArrayList<ArrayList<ICOImage>> newIcons = new ArrayList<>();
-        
-        private IOException fileExc = null;
-        
-        private Exception exc = null;
-        
-        private volatile boolean loading = false;
-        
-        private volatile boolean success = false;
-        
-        private Integer selected;
-        
-        GenerateImages1(File file, Integer selected){
-            this.file = Objects.requireNonNull(file);
-            image = null;
-            this.selected = selected;
-        }
-        
-        GenerateImages1(File file){
-            this(file,null);
-        }
-        
-        GenerateImages1(BufferedImage image, Integer selected){
-            this.image = Objects.requireNonNull(image);
-            file = null;
-            this.selected = selected;
-        }
-        
-        GenerateImages1(BufferedImage image){
-            this(image,null);
-        }
-        
-        public synchronized boolean isLoading(){
-            return loading;
-        }
-        
-        public synchronized boolean isSuccessful(){
-            return success;
-        }
-        @Override
-        protected Void doInBackground() throws Exception {
-            getLogger().entering(this.getClass().getName(), "doInBackground");
-            setInputEnabled(false);
-            progressBar.setValue(0);
-            progressBar.setStringPainted(true);
-            loading = true;
-            if (file != null){
-                progressBar.setIndeterminate(true);
-                progressDisplay.setString("Loading Image From File");
-                try {
-                    image = ImageIO.read(file);
-                    if (image.getType() != BufferedImage.TYPE_INT_ARGB){
-                        BufferedImage temp = image;
-                        image = new BufferedImage(temp.getWidth(),temp.getHeight(),
-                                BufferedImage.TYPE_INT_ARGB);
-                        Graphics2D g = image.createGraphics();
-                        g.drawImage(temp, 0, 0, null);
-                        g.dispose();
-                    }
-                } catch (IOException ex) {
-                    getLogger().log(Level.WARNING, "Error loading file", ex);
-                    fileExc = ex;
-                    getLogger().exiting(this.getClass().getName(), "doInBackground");
-                    return null;
-                }
-            }
-            progressDisplay.setString("Generating Icon Images");
-            progressBar.setMaximum(ICONS_GENERATED_COUNT);
-            progressBar.setIndeterminate(false);
-            
-            ArrayList<BufferedImage> formatImages = new ArrayList<>();
-            int w = image.getWidth();
-            int h = image.getHeight();
-            boolean tooLarge = w >= AUTO_SHRINK_SIZE.width && h >= AUTO_SHRINK_SIZE.height;
-            if (tooLarge){
-                double ratio = ((double)Math.min(w, h)) / Math.max(w, h);
-                if (w > h){
-                    h = Math.min((int)Math.ceil(ratio*AUTO_SHRINK_SIZE.height),AUTO_SHRINK_SIZE.height);
-                    w = AUTO_SHRINK_SIZE.width;
-                } else if (h > w){
-                    w = Math.min((int)Math.ceil(ratio*AUTO_SHRINK_SIZE.width),AUTO_SHRINK_SIZE.width);
-                    h = AUTO_SHRINK_SIZE.height;
-                } else{
-                    w = AUTO_SHRINK_SIZE.width;
-                    h = AUTO_SHRINK_SIZE.height;
-                }
-            }
-            
-            for (int s = FIRST_IMAGE_SCALING; 
-                    s <= LAST_IMAGE_SCALING; s++){
-                if (tooLarge){
-                    formatImages.add(scaleImage(image,w,h,s));
-                } else
-                    formatImages.add(image);
-                incrementProgress();
-            }
-            
-            try{
-                ArrayList<ArrayList<BufferedImage>> images = new ArrayList<>();
-
-                for (Dimension dim : DEFAULT_ICON_DIMENSIONS) {
-                    ArrayList<BufferedImage> temp = new ArrayList<>();
-                    for (int s = FIRST_IMAGE_SCALING; 
-                            s <= LAST_IMAGE_SCALING; s++){
-                        BufferedImage img = formatImages.get(s);
-                        for (int f = FIRST_IMAGE_FORMATTING; 
-                                f <= LAST_IMAGE_FORMATTING; f++){
-                            temp.add(processImage(img,dim.width,dim.height,f,s));
-                            incrementProgress();
-                        }
-                    }
-                    images.add(temp);
-                }
-
-    //            int iconIndex = 0;
-                for (int d : DEFAULT_BITS_PER_PIXEL){
-                    for (ArrayList<BufferedImage> imgArr : images){
-                        int index = newIcons.size();
-    //                    boolean included = !excludedSet.contains(index);
-                        ArrayList<ICOImage> temp = new ArrayList<>();
-                        for (BufferedImage img : imgArr){
-                            temp.add(createICOImage(img,index,d,
-                                    DEFAULT_AUTO_COMPRESSED_INDEXES.contains(index)));
-                            incrementProgress();
-                        }
-                        newIcons.add(temp);
-    //                    if (included)
-    //                        iconIndex++;
-                    }
-                }
-                success = true;
-            } catch (Exception ex){
-                getLogger().log(Level.WARNING, "Error creating images", ex);
-                exc = ex;
-            }
-            getLogger().exiting(this.getClass().getName(), "doInBackground");
-            return null;
-        }
-        @Override
-        protected void done(){
-            loading = false;
-            if (!success){
-                if (fileExc != null){
-                    JOptionPane.showMessageDialog(Iconifier.this, 
-                            "An error occurred while attempting to load the image from the file.\n\nError: "+fileExc, 
-                            "Error Loading Image", JOptionPane.ERROR_MESSAGE);
-                } else if (exc != null){
-                    JOptionPane.showMessageDialog(Iconifier.this, 
-                            "An error occurred while attempting generate the icon images.\n\nError: "+exc, 
-                            "Error Generating Images", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(Iconifier.this, 
-                            "An unknown error occurred while attempting to load the image.",
-                            "Error Loading Images", JOptionPane.ERROR_MESSAGE);
-                }
-            } else {
-                sourceImage = image;
-                iconsOld = newIcons;
-                compressedSet.clear();
-                compressedSet.addAll(DEFAULT_AUTO_COMPRESSED_INDEXES);
-                excludedSet.clear();
-                scaleSettings.clear();
-                imagePreviewModel.setSelectedItem(null);
-                populateImagePreviews();
-                if (selected != null && selected >= 0 && selected < imagePreviewModel.size())
-                    imagePreviewModel.setSelectedItem(imagePreviewModel.get(selected));
-            }
-            progressBar.setIndeterminate(false);
-            progressBar.setStringPainted(false);
-            progressBar.setValue(0);
-            setInputEnabled(true);
-        }
-    }
     /**
      * This attempts to create the given directories, opening an Error 
      * JOptionPane if failed, and returns whether it was successful.
