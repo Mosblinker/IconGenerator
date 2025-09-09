@@ -274,24 +274,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         }
         return iconImages;
     }
-    /**
-     * This updates the boolean value stored at the given key in the program's 
-     * preference node to reflect whether the given toggle button is selected or 
-     * not.
-     * @param key The key for the value in the preference node to update.
-     * @param toggleButton The toggle button to use to set the value in the 
-     * preference node.
-     */
-    private void updateConfigBoolean(String key, AbstractButton toggleButton){
-        if (config.getPreferences() != null){        // If the preference node is available
-            try{
-                config.getPreferences().putBoolean(key, toggleButton.isSelected());
-            } catch (IllegalStateException ex){ 
-                if (isInDebug())    // If we are in debug mode
-                    System.out.println("Error: " + ex);
-            }
-        }
-    }
     
     private Border getPreviewBorder(){
         return previewBorders[(showPreviewBorderToggle.isSelected())?0:1];
