@@ -1160,10 +1160,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         int w = image.getWidth();
         int h = image.getHeight();
         if (w == width && h == height){
-            if (image.getType() == BufferedImage.TYPE_INT_ARGB)
-                return image;
-            else
-                return scaleImage(image,width,height,interpolation);
+            return scaleImage(image,width,height,interpolation);
         }
         int x, y;
         double ratio = ((double) Math.min(w, h)) / Math.max(w, h);
