@@ -30,7 +30,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.filechooser.FileFilter;
 import net.coobird.thumbnailator.Thumbnailator;
-import net.coobird.thumbnailator.Thumbnails;
 import net.sf.image4j.codec.bmp.*;
 import net.sf.image4j.codec.ico.*;
 import net.sf.image4j.util.ConvertUtil;
@@ -1157,13 +1156,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 drawn = image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
                 break;
             case(IMAGE_SCALING_THUMBNAILATOR):
-                try {
-                    drawn = Thumbnails.of(image).size(w, h).asBufferedImage();//Thumbnailator.createThumbnail(image,width,height);
-                    break;
-                } catch (IOException ex) {
-                    getLogger().log(Level.WARNING, "Thumbnailator Error", ex);
-                    drawn = image;
-                }
+                drawn = Thumbnailator.createThumbnail(image,width,height);
+                break;
             default:
                 Object interValue;
                 switch(interpolation){
