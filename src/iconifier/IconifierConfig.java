@@ -29,4 +29,23 @@ public class IconifierConfig {
     public static final String CIRCULAR_ICON_SETTING_KEY = "CircularIcon";
     
     public static final String FEATHERING_SETTING_KEY = "Feathering";
+    /**
+     * 
+     */
+    public static final String FILE_CHOOSER_SIZE_KEY = "FileChooserSize";
+    /**
+     * 
+     */
+    public static final String FILE_CHOOSER_CURRENT_DIRECTORY_KEY = 
+            "CurrentDirectory";
+    /**
+     * 
+     */
+    public static final String FILE_CHOOSER_SELECTED_FILE_KEY = 
+            "SelectedFile";
+    /**
+     * 
+     */
+    public static final String FILE_CHOOSER_FILE_FILTER_KEY = 
+            "FileFilter";
 }
