@@ -423,8 +423,21 @@ public class IconifierConfig {
     public int getProgressDisplaySetting(int defaultValue){
         return getPreferences().getInt(PROGRESS_DISPLAY_KEY, defaultValue);
     }
-    
-    
+    /**
+     * 
+     * @param defaultValue
+     * @return 
+     */
+    public boolean isPreviewBorderShown(boolean defaultValue){
+        return getPreferences().getBoolean(SHOW_PREVIEW_BORDER_KEY, defaultValue);
+    }
+    /**
+     * 
+     * @param value 
+     */
+    public void setPreviewBorderShown(boolean value){
+        getPreferences().putBoolean(SHOW_PREVIEW_BORDER_KEY, value);
+    }
     /**
      * 
      */

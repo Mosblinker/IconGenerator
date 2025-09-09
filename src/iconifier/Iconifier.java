@@ -225,7 +225,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         if (displaySettings != 0)
             progressDisplay.setDisplaySettings(displaySettings);
         try{    
-            showPreviewBorderToggle.setSelected(config.getPreferences().getBoolean(SHOW_PREVIEW_BORDER_KEY, 
+            showPreviewBorderToggle.setSelected(config.isPreviewBorderShown(
                     showPreviewBorderToggle.isSelected()));
             scaleImageAlwaysToggle.setSelected(config.getPreferences().getBoolean(SCALE_IMAGE_PREVIEW_KEY, 
                     scaleImageAlwaysToggle.isSelected()));
@@ -956,7 +956,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
     private void showPreviewBorderToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showPreviewBorderToggleActionPerformed
         previewLabel.setThumbnailBorder(getPreviewBorder());
-        updateConfigBoolean(SHOW_PREVIEW_BORDER_KEY, showPreviewBorderToggle);
+        config.setPreviewBorderShown(showPreviewBorderToggle.isSelected());
     }//GEN-LAST:event_showPreviewBorderToggleActionPerformed
 
     private void scaleImageAlwaysToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_scaleImageAlwaysToggleActionPerformed
