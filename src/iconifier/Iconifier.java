@@ -991,7 +991,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     
     private void setPreviewImage(){
         int selected = previewComboBox.getSelectedIndex();
-        ICOImage img = (ICOImage) imagePreviewModel.getSelectedItem();
+        ICOImage img = getSelectedImage();
         setPreviewImage((img != null) ? img.getImage() : null);
         pngCheckBox.setSelected((img != null) ? img.isPngCompressed() : false);
         includeToggle.setSelected((img != null) ? img.getIconIndex() >= 0 : false);
