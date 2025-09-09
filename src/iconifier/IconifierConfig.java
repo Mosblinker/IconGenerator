@@ -5,14 +5,18 @@
 package iconifier;
 
 import config.ConfigUtilities;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
 import utils.SwingExtendedUtilities;
 
 /**
@@ -252,5 +256,177 @@ public class IconifierConfig {
      */
     public void putFile(String key, File value){
         putFile(getPreferences(),key,value);
+    }
+    /**
+     * 
+     * @return 
+     */
+    public Rectangle getProgramBounds(){
+        return getRectangle(PROGRAM_BOUNDS_KEY);
+    }
+    /**
+     * 
+     * @param comp
+     * @return 
+     */
+    public Rectangle getProgramBounds(Iconifier comp){
+        Rectangle rect = getProgramBounds();
+        SwingExtendedUtilities.setComponentBounds(comp, rect);
+        return rect;
+    }
+    /**
+     * 
+     * @param comp 
+     */
+    public void setProgramBounds(Iconifier comp){
+        putRectangle(PROGRAM_BOUNDS_KEY,comp);
+    }
+    /**
+     * 
+     * @param fc
+     * @param defaultValue
+     * @return 
+     */
+    public File getSelectedFile(JFileChooser fc, File defaultValue){
+        return getFile(getFileChooserPreferences(fc),
+                FILE_CHOOSER_SELECTED_FILE_KEY,defaultValue);
+    }
+    /**
+     * 
+     * @param fc
+     * @return 
+     */
+    public File getSelectedFile(JFileChooser fc){
+        return getSelectedFile(fc,null);
+    }
+    /**
+     * 
+     * @param fc
+     * @param file 
+     */
+    public void setSelectedFile(JFileChooser fc, File file){
+        putFile(getFileChooserPreferences(fc),FILE_CHOOSER_SELECTED_FILE_KEY,file);
+    }
+    /**
+     * 
+     * @param fc 
+     */
+    public void setSelectedFile(JFileChooser fc){
+        setSelectedFile(fc,fc.getSelectedFile());
+    }
+    /**
+     * 
+     * @param fc
+     * @return 
+     */
+    public Dimension getFileChooserSize(JFileChooser fc){
+        return ConfigUtilities.getDimension(getFileChooserPreferences(fc),
+                FILE_CHOOSER_SIZE_KEY,null);
+    }
+    /**
+     * 
+     * @param fc
+     */
+    public void setFileChooserSize(JFileChooser fc){
+        ConfigUtilities.putDimension(getFileChooserPreferences(fc),
+                FILE_CHOOSER_SIZE_KEY,fc);
+    }
+    /**
+     * 
+     * @param fc
+     * @return 
+     */
+    public File getCurrentDirectory(JFileChooser fc){
+        return getFile(getFileChooserPreferences(fc),
+                FILE_CHOOSER_CURRENT_DIRECTORY_KEY,null);
+    }
+    /**
+     * 
+     * @param fc 
+     */
+    public void setCurrentDirectory(JFileChooser fc){
+        putFile(getFileChooserPreferences(fc),FILE_CHOOSER_CURRENT_DIRECTORY_KEY,
+                fc.getCurrentDirectory());
+    }
+    /**
+     * 
+     * @param fc
+     * @return 
+     */
+    public FileFilter getFileFilter(JFileChooser fc){
+        return ConfigUtilities.getFileFilter(getFileChooserPreferences(fc), fc, 
+                FILE_CHOOSER_FILE_FILTER_KEY, null);
+    }
+    /**
+     * 
+     * @param fc
+     * @param filter 
+     */
+    public void setFileFilter(JFileChooser fc, FileFilter filter){
+        ConfigUtilities.putFileFilter(getFileChooserPreferences(fc), fc, 
+                FILE_CHOOSER_FILE_FILTER_KEY, filter);
+    }
+    /**
+     * 
+     * @param fc 
+     */
+    public void setFileFilter(JFileChooser fc){
+        setFileFilter(fc,fc.getFileFilter());
+    }
+    /**
+     * 
+     * @param fc 
+     */
+    public void storeFileChooser(JFileChooser fc){
+            // Put the file chooser's size in the preference node
+        setFileChooserSize(fc);
+            // Put the file chooser's current directory in the preference node
+        setCurrentDirectory(fc);
+    }
+    /**
+     * 
+     * @param fc 
+     */
+    public void loadFileChooser(JFileChooser fc){
+            // Get the current directory for the file chooser
+        File dir = getCurrentDirectory(fc);
+            // If there is a current directory for the file chooser and it exists
+        if (dir != null && dir.exists()){
+                // Set the file chooser's current directory
+            fc.setCurrentDirectory(dir);
+        }   // Get the selected file for the file chooser, or null
+        File file = getSelectedFile(fc);
+            // If there is a selected file for the file chooser
+        if (file != null){
+                // Select that file in the file chooser
+            fc.setSelectedFile(file);
+        }   // Load the file chooser's size from the preference node
+        SwingExtendedUtilities.setComponentSize(fc,getFileChooserSize(fc));
+            // Get the file filter for the file chooser
+        FileFilter filter = getFileFilter(fc);
+            // If there is a file filter selected
+        if (filter != null)
+            fc.setFileFilter(filter);
+    }
+    
+    
+    /**
+     * 
+     */
+    public class FileChooserPropertyChangeListener implements PropertyChangeListener{
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+                // If the property name is null or the source is not a file 
+                // chooser
+            if (evt.getPropertyName() == null || !(evt.getSource() instanceof JFileChooser))
+                return;
+                // Determine the property that was just changed
+            switch(evt.getPropertyName()){
+                    // If the file filter has changed
+                case(JFileChooser.FILE_FILTER_CHANGED_PROPERTY):
+                        // Store the file filter in the preference node
+                    setFileFilter((JFileChooser)evt.getSource());
+            }
+        }
     }
 }
