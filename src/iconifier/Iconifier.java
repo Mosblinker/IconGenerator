@@ -231,14 +231,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                     scaleImageAlwaysToggle.isSelected()));
             setComboIndexFromConfig(IMAGE_FORMAT_SETTING_KEY,formatImageCombo);
             setComboIndexFromConfig(SCALE_IMAGE_SETTING_KEY,scaleCombo);
-            Dimension dim = getPreferenceSize(null,getPreferredSize());
-                // Get the minimum size for the program
-            Dimension min = getMinimumSize();
-                // Make sure the width and height are within range
-            dim.width = Math.max(dim.width, min.width);
-            dim.height = Math.max(dim.height, min.height);
-                // Set the size from the node
-            setSize(dim);
             circleToggle.setSelected(config.getPreferences().getBoolean(CIRCULAR_ICON_SETTING_KEY, 
                     circleToggle.isSelected()));
             featheringSpinner.setValue(Math.max(Math.min(
@@ -252,6 +244,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         for (JFileChooser fc : config.getFileChooserPreferenceMap().keySet()){
             config.loadFileChooser(fc);
         }
+        config.getProgramBounds(Iconifier.this);
         
         previewBorders = new Border[]{
             BorderFactory.createCompoundBorder(
@@ -346,82 +339,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 if (isInDebug())    // If we are in debug mode
                     System.out.println("Error: " + ex);
             }
-        }
-    }
-    /**
-     * This checks to see if the preference node is available, and if not, 
-     * throws an IllegalStateException.
-     * @throws IllegalStateException If the preference node was not available to 
-     * the program at initialization.
-     */
-    private void checkIfPreferencesIsAvailable(){
-            // If the preference node is not available
-        if (config.getPreferences() == null)
-            throw new IllegalStateException("Preference node is not available");
-    }
-    /**
-     * This returns the size mapped to the given key in the preference node, or 
-     * {@code def} if no size is mapped to that key.
-     * @param key The key to get the associated size for.
-     * @param def The default size to use if there is no size associated with 
-     * the given key.
-     * @return The size mapped to the given key, or {@code def} if no size is 
-     * mapped to the given key.
-     * @throws IllegalStateException If the preference node is not available, 
-     * either due to not being available when the program started up or due to 
-     * the preference node being removed.
-     * @throws IllegalArgumentException If the key contains the null control 
-     * character.
-     */
-    private Dimension getPreferenceSize(String key, Dimension def){
-            // Use an empty String if given null
-        key = Objects.requireNonNullElse(key, "");
-            // Check as to whether the preference node is available
-        checkIfPreferencesIsAvailable();
-            // Get the node used to store the size
-        Preferences node = config.getPreferences().node(key);
-            // If both the width and height have not been set
-        if (node.get(PREFERENCE_WIDTH_KEY, null) == null && 
-                node.get(PREFERENCE_HEIGHT_KEY, null) == null)
-            return def;
-           // If the default size is null
-        if (def == null)
-            def = new Dimension(0,0);
-            // Get the width
-        int width = node.getInt(PREFERENCE_WIDTH_KEY, def.width);
-            // Get the height
-        int height = node.getInt(PREFERENCE_HEIGHT_KEY, def.height);
-        return new Dimension(width,height);
-    }
-    /**
-     * This maps the given key to the given size in the preference node. If the 
-     * given size is null, then the key will be removed.
-     * @param key The key to map the size to.
-     * @param size The size to map to the key.
-     * @throws IllegalStateException If the preference node is not available, 
-     * either due to not being available when the program started up or due to 
-     * the preference node being removed.
-     * @throws IllegalArgumentException If the key either contains the null 
-     * control character or is too long to be stored in the preference node. 
-     */
-    private void setPreferenceSize(String key, Dimension size){
-            // Check as to whether the preference node is available
-        checkIfPreferencesIsAvailable();
-            // Use an empty String if given null
-        key = Objects.requireNonNullElse(key, "");
-            // Get the node used to store the size
-        Preferences node = config.getPreferences().node(key);
-            // If the given size is null
-        if (size == null){
-                // Remove the width
-            node.remove(PREFERENCE_WIDTH_KEY);
-                // Remove the height
-            node.remove(PREFERENCE_HEIGHT_KEY);
-        } else {
-                // Set the width
-            node.putInt(PREFERENCE_WIDTH_KEY, size.width);
-                // Set the height
-            node.putInt(PREFERENCE_HEIGHT_KEY, size.height);
         }
     }
     
@@ -1061,12 +978,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
             // If the window is not maximized
         if (!isMaximized()){
-            try{    // Set the stored size in the preference node
-                setPreferenceSize(null,getSize());
-            }catch (IllegalStateException ex){ 
-                if (isInDebug())    // If we are in debug mode
-                    System.out.println("Error: " + ex);
-            }
+            config.setProgramBounds(this);
         }
     }//GEN-LAST:event_formComponentResized
 
