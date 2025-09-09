@@ -1231,6 +1231,13 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         return ICOEncoder.convert(image, bpp);
     }
     
+    private ICOImage createICOImage(BufferedImage image, int index, int bpp, 
+            boolean compressed){
+        ICOImage icon = createICOImage(convertColorDepth(image,bpp));
+        icon.setIconIndex(index);
+        icon.setPngCompressed(compressed);
+        return icon;
+    }
     
     
     private class GenerateImages1 extends SwingWorker<Void, Void>{
@@ -1348,13 +1355,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     //                    boolean included = !excludedSet.contains(index);
                         ArrayList<ICOImage> temp = new ArrayList<>();
                         for (BufferedImage img : imgArr){
-                            ICOImage icon = createICOImage(convertColorDepth(img,d));
-                            icon.setIconIndex(index);
-    //                        if (included)
-    //                            icon.setIconIndex(iconIndex);
-                            icon.setPngCompressed(DEFAULT_AUTO_COMPRESSED_INDEXES
-                                    .contains(index));
-                            temp.add(icon);
+                            temp.add(createICOImage(img,index,d,
+                                    DEFAULT_AUTO_COMPRESSED_INDEXES.contains(index)));
                             incrementProgress();
                         }
                         newIcons.add(temp);
