@@ -748,8 +748,16 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     }//GEN-LAST:event_useDebugIconToggleActionPerformed
 
     private void pngCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pngCheckBoxActionPerformed
-        for (ICOImage img : iconsOld.get(previewComboBox.getSelectedIndex())){
-            img.setPngCompressed(pngCheckBox.isSelected());
+        if (pngCheckBox.isSelected())
+            compressedSet.add(previewComboBox.getSelectedIndex());
+        else
+            compressedSet.remove(previewComboBox.getSelectedIndex());
+        if (imagePreviewModel.getSelectedItem() instanceof ICOImage)
+            ((ICOImage)imagePreviewModel.getSelectedItem()).setPngCompressed(pngCheckBox.isSelected());
+        if (iconsOld != null){
+            for (ICOImage img : iconsOld.get(previewComboBox.getSelectedIndex())){
+                img.setPngCompressed(pngCheckBox.isSelected());
+            }
         }
         previewComboBox.repaint();
     }//GEN-LAST:event_pngCheckBoxActionPerformed
@@ -897,6 +905,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         config.setIconCircular(circleToggle.isSelected());
         imgGen1 = new GenerateImages1(sourceImage,getSelectedImageIndex());
         imgGen1.execute();
+        imgGen = new GenerateImages(sourceImage,getSelectedImageIndex());
+        imgGen.execute();
     }//GEN-LAST:event_circleToggleActionPerformed
     
     private int getScaleSetting(int index){
@@ -1032,6 +1042,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private boolean active = true;
     private final boolean debugMode;
     private GenerateImages1 imgGen1 = null;
+    private GenerateImages imgGen = null;
     private SaveIconImages saver = null;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBoxMenuItem activeTestToggle;
@@ -1315,6 +1326,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         
         private final ArrayList<ICOImage> newIcons = new ArrayList<>();
         
+        private final Set<Integer> compressed = new HashSet<>();
+        
         private IOException fileExc = null;
         
         private Exception exc = null;
@@ -1394,8 +1407,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             
             int format = formatImageCombo.getSelectedIndex();
             Map<Integer,Integer> scaling = new HashMap<>();
-            if (selected != null)
+            if (selected != null){
                 scaling.putAll(scaleSettings);
+                compressed.addAll(compressedSet);
+            }
             int defScaling = scaleCombo.getSelectedIndex();
             
             progressBar.setMaximum(DEFAULT_ICON_DIMENSIONS.length*(DEFAULT_BITS_PER_PIXEL.length+1));
@@ -1413,9 +1428,13 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
                 for (int d : DEFAULT_BITS_PER_PIXEL){
                     for (BufferedImage img : images){
+                        if (selected == null){
+                            if (img.getWidth() >= AUTO_COMPRESS_SIZE.width || 
+                                    img.getHeight() >= AUTO_COMPRESS_SIZE.height)
+                                compressed.add(newIcons.size());
+                        }
                         newIcons.add(createICOImage(img,newIcons.size(),d,
-                                img.getWidth() >= AUTO_COMPRESS_SIZE.width || 
-                                        img.getHeight() >= AUTO_COMPRESS_SIZE.height));
+                                compressed.contains(newIcons.size())));
                         incrementProgress();
                     }
                 }
@@ -1448,7 +1467,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 sourceImage = image;
                 if (selected == null){
                     compressedSet.clear();
-                    compressedSet.addAll(DEFAULT_AUTO_COMPRESSED_INDEXES);
+                    compressedSet.addAll(compressed);
                     excludedSet.clear();
                     scaleSettings.clear();
                     imagePreviewModel.setSelectedItem(null);
