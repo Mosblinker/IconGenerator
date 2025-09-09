@@ -42,9 +42,13 @@ import net.sf.image4j.util.ConvertUtil;
  */
 public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     /**
-     * This has the name of this program.
+     * This is the name of this program.
      */
     public static final String PROGRAM_NAME = "Icon Generator";
+    /**
+     * This is the version of the program.
+     */
+    public static final String PROGRAM_VERSION = "0.2.0";
     /**
      * This has the path of the icon that this program displays.
      */
@@ -151,7 +155,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     /**
      * 
      */
-    private static final Logger LOGGER = Logger.getLogger("IconGenerator");
+    private static final Logger LOGGER = Logger.getLogger("IconGenerator-"+PROGRAM_VERSION);
     /**
      * 
      * @return 
