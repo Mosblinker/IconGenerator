@@ -79,41 +79,9 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         new Dimension(768,768)
     };
     
-    private static final int AUTO_SHRINK_MULTIPLIER = 4;
-    
-    private static Dimension generateShrinkSize(){
-        Dimension dim = new Dimension(DEFAULT_ICON_DIMENSIONS[DEFAULT_ICON_DIMENSIONS.length-1]);
-        dim.width *= AUTO_SHRINK_MULTIPLIER;
-        dim.height *= AUTO_SHRINK_MULTIPLIER;
-        return dim;
-    }
-    
-    private static final Dimension AUTO_SHRINK_SIZE = generateShrinkSize();
-    
     private static final Dimension AUTO_COMPRESS_SIZE = new Dimension(256, 256);
     
     private static final int[] DEFAULT_BITS_PER_PIXEL = {/*4, 8, 24, */32};
-    
-    private static Set<Integer> generateAutoCompressedIndexes(){
-        Set<Integer> compressed = new TreeSet<>();
-        Set<Integer> offsets = new HashSet<>();
-        for (int i = 0; i < DEFAULT_BITS_PER_PIXEL.length; i++){
-            offsets.add(i*DEFAULT_ICON_DIMENSIONS.length);
-        }
-        for (int i = 0; i < DEFAULT_ICON_DIMENSIONS.length; i++){
-            Dimension dim = DEFAULT_ICON_DIMENSIONS[i];
-            if (dim.width >= AUTO_COMPRESS_SIZE.width || 
-                    dim.height >= AUTO_COMPRESS_SIZE.height){
-                for (Integer offset : offsets){
-                    compressed.add(i+offset);
-                }
-            }
-        }
-        return Collections.unmodifiableSet(compressed);
-    }
-    
-    private static final Set<Integer> DEFAULT_AUTO_COMPRESSED_INDEXES = 
-            generateAutoCompressedIndexes();
     
     public static ICOImage createICOImage(BufferedImage img){
         InfoHeader info = BMPEncoder.createInfoHeader(img);
