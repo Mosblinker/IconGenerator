@@ -504,6 +504,43 @@ public class IconifierConfig {
     }
     /**
      * 
+     * @return 
+     */
+    public boolean isIconCircular(){
+        return getPreferences().getBoolean(CIRCULAR_ICON_SETTING_KEY, false);
+    }
+    /**
+     * 
+     * @param value 
+     */
+    public void setIconCircular(boolean value){
+        getPreferences().putBoolean(CIRCULAR_ICON_SETTING_KEY, value);
+    }
+    /**
+     * 
+     * @param defaultValue
+     * @return 
+     */
+    public float getIconFeathering(float defaultValue){
+        return Math.max(Math.min(getPreferences().getFloat(FEATHERING_SETTING_KEY, 
+                defaultValue), 1.0f), 0.0f);
+    }
+    /**
+     * 
+     * @return 
+     */
+    public float getIconFeathering(){
+        return getIconFeathering(1.0f);
+    }
+    /**
+     * 
+     * @param value 
+     */
+    public void setIconFeathering(float value){
+        getPreferences().putFloat(FEATHERING_SETTING_KEY, value);
+    }
+    /**
+     * 
      */
     public class FileChooserPropertyChangeListener implements PropertyChangeListener{
         @Override

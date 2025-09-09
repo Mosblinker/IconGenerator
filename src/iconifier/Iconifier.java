@@ -11,7 +11,6 @@ import static components.disable.DisableInput.beep;
 import components.progress.JProgressDisplayMenu;
 import files.FilesExtended;
 import files.extensions.ImageExtensions;
-import static iconifier.IconifierConfig.*;
 import icons.*;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -219,17 +218,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         scaleImageAlwaysToggle.setSelected(config.isImageAlwaysScaled());
         formatImageCombo.setSelectedIndex(config.getImageFormatting());
         scaleCombo.setSelectedIndex(config.getDefaultImageScaling());
-        try{
-            circleToggle.setSelected(config.getPreferences().getBoolean(CIRCULAR_ICON_SETTING_KEY, 
-                    circleToggle.isSelected()));
-            featheringSpinner.setValue(Math.max(Math.min(
-                    config.getPreferences().getFloat(FEATHERING_SETTING_KEY, 1.0f), 1.0f), 0.0f));
-        } catch (SecurityException | IllegalStateException ex){
-            System.out.println("Unable to load settings: " +ex);
-        } catch (IllegalArgumentException ex){
-            System.out.println("Invalid setting: " + ex);
-        }
-        
+        circleToggle.setSelected(config.isIconCircular());
+        featheringSpinner.setValue(config.getIconFeathering());
         for (JFileChooser fc : config.getFileChooserPreferenceMap().keySet()){
             config.loadFileChooser(fc);
         }
@@ -944,12 +934,12 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     }//GEN-LAST:event_formComponentResized
 
     private void circleToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_circleToggleActionPerformed
-        updateConfigBoolean(CIRCULAR_ICON_SETTING_KEY,circleToggle);
+        config.setIconCircular(circleToggle.isSelected());
     }//GEN-LAST:event_circleToggleActionPerformed
 
     private void featheringSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_featheringSpinnerStateChanged
         float feathering = getFeathering();
-        config.getPreferences().putFloat(FEATHERING_SETTING_KEY, feathering);
+        config.setIconFeathering(feathering);
     }//GEN-LAST:event_featheringSpinnerStateChanged
     
     private float getFeathering(){
