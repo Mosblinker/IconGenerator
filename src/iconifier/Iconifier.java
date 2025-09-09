@@ -710,8 +710,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                         i, 
                         img.getIconIndex(), img.getWidth(), img.getHeight(),
                         img.getColourDepth(), img.isIndexed(), img.isPngCompressed(),
-                        scaleSettings.getOrDefault(i, scaleCombo.getSelectedIndex()), 
-                        excludedSet.contains(i), compressedSet.contains(i));
+                        getScaleSetting(i), excludedSet.contains(i), 
+                        compressedSet.contains(i));
         }
         System.out.println();
     }//GEN-LAST:event_printTestButtonActionPerformed
