@@ -185,19 +185,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      */
     private static final String SAVE_FILE_CHOOSER_PREFERENCE_NODE = 
             "SaveFileChooser";
-    
-    private static final String OPEN_FILE_CHOOSER_DIRECTORY_KEY = 
-            "OpenFCCurrentDirectory";
-    /**
-     * This is the key in the preference node for the directory for the save 
-     * file chooser.
-     */
-    private static final String SAVE_FILE_CHOOSER_DIRECTORY_KEY = 
-            "SaveFCCurrentDirectory";
-    
-    private static final String OPEN_FILE_CHOOSER_FILE_FILTER_KEY = 
-            "OpenFCFileFilter";
-    
     /**
      * Creates new form Iconifier
      * @param debugMode
@@ -244,22 +231,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                     scaleImageAlwaysToggle.isSelected()));
             setComboIndexFromConfig(IMAGE_FORMAT_SETTING_KEY,formatImageCombo);
             setComboIndexFromConfig(SCALE_IMAGE_SETTING_KEY,scaleCombo);
-            String dirName = config.getPreferences().get(OPEN_FILE_CHOOSER_DIRECTORY_KEY, null);
-            if (dirName != null){
-                File dir = new File(dirName);
-                if (dir.exists())
-                    openFC.setCurrentDirectory(dir);
-            }
-            dirName = config.getPreferences().get(SAVE_FILE_CHOOSER_DIRECTORY_KEY, null);
-            if (dirName != null){
-                File dir = new File(dirName);
-                if (dir.exists())
-                    saveFC.setCurrentDirectory(dir);
-            }
-            openFC.setPreferredSize(getPreferenceSize(OPEN_FILE_CHOOSER_PREFERENCE_NODE,
-                    openFC.getPreferredSize()));
-            saveFC.setPreferredSize(getPreferenceSize(SAVE_FILE_CHOOSER_PREFERENCE_NODE,
-                    saveFC.getPreferredSize()));
             Dimension dim = getPreferenceSize(null,getPreferredSize());
                 // Get the minimum size for the program
             Dimension min = getMinimumSize();
@@ -268,9 +239,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             dim.height = Math.max(dim.height, min.height);
                 // Set the size from the node
             setSize(dim);
-            int filter = config.getPreferences().getInt(OPEN_FILE_CHOOSER_FILE_FILTER_KEY, -1);
-            if (filter >= 0 && filter < openFC.getChoosableFileFilters().length)
-                openFC.setFileFilter(openFC.getChoosableFileFilters()[filter]);
             circleToggle.setSelected(config.getPreferences().getBoolean(CIRCULAR_ICON_SETTING_KEY, 
                     circleToggle.isSelected()));
             featheringSpinner.setValue(Math.max(Math.min(
@@ -279,6 +247,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             System.out.println("Unable to load settings: " +ex);
         } catch (IllegalArgumentException ex){
             System.out.println("Invalid setting: " + ex);
+        }
+        
+        for (JFileChooser fc : config.getFileChooserPreferenceMap().keySet()){
+            config.loadFileChooser(fc);
         }
         
         previewBorders = new Border[]{
@@ -512,11 +484,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         openFC.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fileChooserActionPerformed(evt);
-            }
-        });
-        openFC.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                openFCPropertyChange(evt);
             }
         });
 
@@ -865,11 +832,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             file = openFC.getSelectedFile();
         }
         openFC.setPreferredSize(openFC.getSize());
-        if (config.getPreferences() != null){
-            setPreferenceSize(OPEN_FILE_CHOOSER_PREFERENCE_NODE,openFC.getSize());
-            config.getPreferences().put(OPEN_FILE_CHOOSER_DIRECTORY_KEY, 
-                    openFC.getCurrentDirectory().toString());
-        }
+        config.storeFileChooser(openFC);
+        config.setSelectedFile(openFC, file);
         if (file != null){
             imgGen = new GenerateImages(file);
             imgGen.execute();
@@ -1017,11 +981,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private File openSaveFileChooser(){
         int option = saveFC.showSaveDialog(this);
         saveFC.setPreferredSize(saveFC.getSize());
-        if (config.getPreferences() != null){
-            setPreferenceSize(SAVE_FILE_CHOOSER_PREFERENCE_NODE,saveFC.getSize());
-            config.getPreferences().put(SAVE_FILE_CHOOSER_DIRECTORY_KEY, 
-                    saveFC.getCurrentDirectory().toString());
-        }   // If the user wants to save the file
+        config.storeFileChooser(saveFC);
+            // If the user wants to save the file
         if (option == JFileChooser.APPROVE_OPTION)
             return saveFC.getSelectedFile();
         else
@@ -1032,6 +993,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         File file;
         do{
             file = openSaveFileChooser();
+            config.setSelectedFile(saveFC, file);
             if (file == null)
                 return;
             if (ICON_FILTER.equals(saveFC.getFileFilter()) && !ICON_FILTER.accept(file)){
@@ -1107,22 +1069,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             }
         }
     }//GEN-LAST:event_formComponentResized
-
-    private void openFCPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_openFCPropertyChange
-//        System.out.println(evt);
-        if (config.getPreferences() != null && 
-                JFileChooser.FILE_FILTER_CHANGED_PROPERTY.equals(evt.getPropertyName())){
-            FileFilter filter = openFC.getFileFilter();
-            int index = -1;
-            FileFilter[] filters = openFC.getChoosableFileFilters();
-            for (int i = 0; i < filters.length && index < 0; i++){
-                if (Objects.equals(filter, filters[i]))
-                    index = i;
-            }
-            if (index > 0)
-                config.getPreferences().putInt(OPEN_FILE_CHOOSER_FILE_FILTER_KEY, index);
-        }
-    }//GEN-LAST:event_openFCPropertyChange
 
     private void circleToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_circleToggleActionPerformed
         updateConfigBoolean(CIRCULAR_ICON_SETTING_KEY,circleToggle);
