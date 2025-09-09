@@ -39,7 +39,7 @@ public class IconifierConfig {
      */
     public static final String ALWAYS_SCALE_KEY = "AlwaysScale";
     
-    public static final String IMAGE_FORMATTING_KEY = "FormatImage";
+    public static final String IMAGE_FORMATTING_KEY = "ImageFormatting";
     
     public static final String SCALE_IMAGE_SETTING_KEY = "ScaleImage";
     
