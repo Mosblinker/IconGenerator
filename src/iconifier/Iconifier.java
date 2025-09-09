@@ -224,24 +224,24 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         saveFC.setFileFilter(ICON_FILTER);
         
         try{    // Try to load the settings from the preference node
-            config = Preferences.userRoot().node(PREFERENCE_NODE_NAME);
-            int displaySettings = config.getInt(PROGRESS_DISPLAY_KEY, 
+            config1 = Preferences.userRoot().node(PREFERENCE_NODE_NAME);
+            int displaySettings = config1.getInt(PROGRESS_DISPLAY_KEY, 
                     progressDisplay.getDisplaySettings());
             if (displaySettings != 0)
                 progressDisplay.setDisplaySettings(displaySettings);
-            showPreviewBorderToggle.setSelected(config.getBoolean(SHOW_PREVIEW_BORDER_KEY, 
+            showPreviewBorderToggle.setSelected(config1.getBoolean(SHOW_PREVIEW_BORDER_KEY, 
                     showPreviewBorderToggle.isSelected()));
-            scaleImageAlwaysToggle.setSelected(config.getBoolean(SCALE_IMAGE_PREVIEW_KEY, 
+            scaleImageAlwaysToggle.setSelected(config1.getBoolean(SCALE_IMAGE_PREVIEW_KEY, 
                     scaleImageAlwaysToggle.isSelected()));
             setComboIndexFromConfig(IMAGE_FORMAT_SETTING_KEY,formatImageCombo);
             setComboIndexFromConfig(SCALE_IMAGE_SETTING_KEY,scaleCombo);
-            String dirName = config.get(OPEN_FILE_CHOOSER_DIRECTORY_KEY, null);
+            String dirName = config1.get(OPEN_FILE_CHOOSER_DIRECTORY_KEY, null);
             if (dirName != null){
                 File dir = new File(dirName);
                 if (dir.exists())
                     openFC.setCurrentDirectory(dir);
             }
-            dirName = config.get(SAVE_FILE_CHOOSER_DIRECTORY_KEY, null);
+            dirName = config1.get(SAVE_FILE_CHOOSER_DIRECTORY_KEY, null);
             if (dirName != null){
                 File dir = new File(dirName);
                 if (dir.exists())
@@ -259,15 +259,15 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             dim.height = Math.max(dim.height, min.height);
                 // Set the size from the node
             setSize(dim);
-            int filter = config.getInt(OPEN_FILE_CHOOSER_FILE_FILTER_KEY, -1);
+            int filter = config1.getInt(OPEN_FILE_CHOOSER_FILE_FILTER_KEY, -1);
             if (filter >= 0 && filter < openFC.getChoosableFileFilters().length)
                 openFC.setFileFilter(openFC.getChoosableFileFilters()[filter]);
-            circleToggle.setSelected(config.getBoolean(CIRCULAR_ICON_SETTING_KEY, 
+            circleToggle.setSelected(config1.getBoolean(CIRCULAR_ICON_SETTING_KEY, 
                     circleToggle.isSelected()));
             featheringSpinner.setValue(Math.max(Math.min(
-                    config.getFloat(FEATHERING_SETTING_KEY, 1.0f), 1.0f), 0.0f));
+                    config1.getFloat(FEATHERING_SETTING_KEY, 1.0f), 1.0f), 0.0f));
         } catch (SecurityException | IllegalStateException ex){
-            config = null;
+            config1 = null;
             System.out.println("Unable to load settings: " +ex);
         } catch (IllegalArgumentException ex){
             System.out.println("Invalid setting: " + ex);
@@ -331,9 +331,9 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      * preference node.
      */
     private void updateConfigBoolean(String key, AbstractButton toggleButton){
-        if (config != null){        // If the preference node is available
+        if (config1 != null){        // If the preference node is available
             try{
-                config.putBoolean(key, toggleButton.isSelected());
+                config1.putBoolean(key, toggleButton.isSelected());
             } catch (IllegalStateException ex){ 
                 if (isInDebug())    // If we are in debug mode
                     System.out.println("Error: " + ex);
@@ -342,9 +342,9 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     }
     
     private void setComboIndexFromConfig(String key, JComboBox comboBox){
-        if (config != null){        // If the preference node is available
+        if (config1 != null){        // If the preference node is available
             try{
-                comboBox.setSelectedIndex(Math.max(Math.min(config.getInt(key, 
+                comboBox.setSelectedIndex(Math.max(Math.min(config1.getInt(key, 
                         comboBox.getSelectedIndex()), comboBox.getItemCount()-1), 0));
             } catch (IllegalStateException ex){ 
                 if (isInDebug())    // If we are in debug mode
@@ -359,9 +359,9 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      * @param comboBox The combo box to get the selected index for
      */
     private void updateConfigComboIndex(String key, JComboBox comboBox){
-        if (config != null){        // If the preference node is available
+        if (config1 != null){        // If the preference node is available
             try{
-                config.putInt(key, comboBox.getSelectedIndex());
+                config1.putInt(key, comboBox.getSelectedIndex());
             } catch (IllegalStateException ex){ 
                 if (isInDebug())    // If we are in debug mode
                     System.out.println("Error: " + ex);
@@ -376,7 +376,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      */
     private void checkIfPreferencesIsAvailable(){
             // If the preference node is not available
-        if (config == null)
+        if (config1 == null)
             throw new IllegalStateException("Preference node is not available");
     }
     /**
@@ -399,7 +399,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             // Check as to whether the preference node is available
         checkIfPreferencesIsAvailable();
             // Get the node used to store the size
-        Preferences node = config.node(key);
+        Preferences node = config1.node(key);
             // If both the width and height have not been set
         if (node.get(PREFERENCE_WIDTH_KEY, null) == null && 
                 node.get(PREFERENCE_HEIGHT_KEY, null) == null)
@@ -430,7 +430,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             // Use an empty String if given null
         key = Objects.requireNonNullElse(key, "");
             // Get the node used to store the size
-        Preferences node = config.node(key);
+        Preferences node = config1.node(key);
             // If the given size is null
         if (size == null){
                 // Remove the width
@@ -857,9 +857,9 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             file = openFC.getSelectedFile();
         }
         openFC.setPreferredSize(openFC.getSize());
-        if (config != null){
+        if (config1 != null){
             setPreferenceSize(OPEN_FILE_CHOOSER_PREFERENCE_NODE,openFC.getSize());
-            config.put(OPEN_FILE_CHOOSER_DIRECTORY_KEY, 
+            config1.put(OPEN_FILE_CHOOSER_DIRECTORY_KEY, 
                     openFC.getCurrentDirectory().toString());
         }
         if (file != null){
@@ -901,15 +901,15 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                         excludedSet.contains(i), compressedSet.contains(i));
         }
         System.out.println();
-        System.out.println("Preference Node: " + config);
-        if (config != null){    // If the preference node is available
+        System.out.println("Preference Node: " + config1);
+        if (config1 != null){    // If the preference node is available
             try{
-                System.out.println("Preference Node Exists: " + config.nodeExists(""));
-                System.out.println("Preference Keys: " + Arrays.toString(config.keys()));
+                System.out.println("Preference Node Exists: " + config1.nodeExists(""));
+                System.out.println("Preference Keys: " + Arrays.toString(config1.keys()));
                 System.out.println("Preferences: ");
                     // Go through the keys in the preference node
-                for (String key : config.keys()){
-                    System.out.printf("\t%30s = %s%n", key,config.get(key, null));
+                for (String key : config1.keys()){
+                    System.out.printf("\t%30s = %s%n", key,config1.get(key, null));
                 }
             } catch(IllegalStateException | BackingStoreException ex){
                 System.out.println("Error: " + ex);
@@ -928,9 +928,9 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      */
     private void progressDisplayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_progressDisplayActionPerformed
         progressDisplay.updateProgressString(progressBar);
-        if (progressDisplay.isProgressDisplayed() && config != null){
+        if (progressDisplay.isProgressDisplayed() && config1 != null){
             try{
-                config.putInt(PROGRESS_DISPLAY_KEY, progressDisplay.getDisplaySettings());
+                config1.putInt(PROGRESS_DISPLAY_KEY, progressDisplay.getDisplaySettings());
             } catch (IllegalStateException ex){ 
                 if (isInDebug())    // If we are in debug mode
                     System.out.println("Error: " + ex);
@@ -1015,9 +1015,9 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private File openSaveFileChooser(){
         int option = saveFC.showSaveDialog(this);
         saveFC.setPreferredSize(saveFC.getSize());
-        if (config != null){
+        if (config1 != null){
             setPreferenceSize(SAVE_FILE_CHOOSER_PREFERENCE_NODE,saveFC.getSize());
-            config.put(SAVE_FILE_CHOOSER_DIRECTORY_KEY, 
+            config1.put(SAVE_FILE_CHOOSER_DIRECTORY_KEY, 
                     saveFC.getCurrentDirectory().toString());
         }   // If the user wants to save the file
         if (option == JFileChooser.APPROVE_OPTION)
@@ -1108,7 +1108,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
     private void openFCPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_openFCPropertyChange
 //        System.out.println(evt);
-        if (config != null && 
+        if (config1 != null && 
                 JFileChooser.FILE_FILTER_CHANGED_PROPERTY.equals(evt.getPropertyName())){
             FileFilter filter = openFC.getFileFilter();
             int index = -1;
@@ -1118,7 +1118,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                     index = i;
             }
             if (index > 0)
-                config.putInt(OPEN_FILE_CHOOSER_FILE_FILTER_KEY, index);
+                config1.putInt(OPEN_FILE_CHOOSER_FILE_FILTER_KEY, index);
         }
     }//GEN-LAST:event_openFCPropertyChange
 
@@ -1128,7 +1128,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
     private void featheringSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_featheringSpinnerStateChanged
         float feathering = getFeathering();
-        config.putFloat(FEATHERING_SETTING_KEY, feathering);
+        config1.putFloat(FEATHERING_SETTING_KEY, feathering);
     }//GEN-LAST:event_featheringSpinnerStateChanged
     
     private float getFeathering(){
@@ -1214,7 +1214,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private Set<Integer> excludedSet = new TreeSet<>();
     private Set<Integer> compressedSet = new TreeSet<>();
     private Border[] previewBorders = null;
-    private Preferences config;
+    private Preferences config1;
     private boolean active = true;
     private final boolean debugMode;
     private GenerateImages imgGen = null;
