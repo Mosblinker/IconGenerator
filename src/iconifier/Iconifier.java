@@ -229,6 +229,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         openFC.setFileFilter(ImageExtensions.IMAGE_FILTER);
         saveFC.setFileFilter(ICON_FILTER);
         
+        config.addFileChooser(openFC, OPEN_FILE_CHOOSER_PREFERENCE_NODE);
+        config.addFileChooser(saveFC, SAVE_FILE_CHOOSER_PREFERENCE_NODE);
+        openFC.addPropertyChangeListener(config.new FileChooserPropertyChangeListener());
+        
         try{    // Try to load the settings from the preference node
             int displaySettings = config.getPreferences().getInt(PROGRESS_DISPLAY_KEY, 
                     progressDisplay.getDisplaySettings());
