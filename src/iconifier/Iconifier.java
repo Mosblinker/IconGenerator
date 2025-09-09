@@ -11,6 +11,7 @@ import static components.disable.DisableInput.beep;
 import components.progress.JProgressDisplayMenu;
 import files.FilesExtended;
 import files.extensions.ImageExtensions;
+import static iconifier.IconifierConfig.*;
 import icons.*;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -163,10 +164,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private static final String PREFERENCE_NODE_NAME = 
             "milo/icon/gen/IconGenerator";
     /**
-     * This is the key in the preference node for the progress display setting.
-     */
-    private static final String PROGRESS_DISPLAY_KEY = "DisplayProgress";
-    /**
      * This is the key in the component-specific preference node for the widths 
      * of components.
      */
@@ -188,18 +185,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      */
     private static final String SAVE_FILE_CHOOSER_PREFERENCE_NODE = 
             "SaveFileChooser";
-    
-    private static final String SHOW_PREVIEW_BORDER_KEY = "ShowPreviewBorder";
-    
-    private static final String SCALE_IMAGE_PREVIEW_KEY = "ScaleImagePreview";
-    
-    private static final String FORMAT_IMAGE_SETTING_KEY = "FormatImage";
-    
-    private static final String SCALE_IMAGE_SETTING_KEY = "ScaleImage";
-    
-    private static final String CIRCULAR_ICON_SETTING_KEY = "CircularIcon";
-    
-    private static final String FEATHERING_SETTING_KEY = "Feathering";
     
     private static final String OPEN_FILE_CHOOSER_DIRECTORY_KEY = 
             "OpenFCCurrentDirectory";
@@ -248,7 +233,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                     showPreviewBorderToggle.isSelected()));
             scaleImageAlwaysToggle.setSelected(config.getBoolean(SCALE_IMAGE_PREVIEW_KEY, 
                     scaleImageAlwaysToggle.isSelected()));
-            setComboIndexFromConfig(FORMAT_IMAGE_SETTING_KEY,formatImageCombo);
+            setComboIndexFromConfig(IMAGE_FORMAT_SETTING_KEY,formatImageCombo);
             setComboIndexFromConfig(SCALE_IMAGE_SETTING_KEY,scaleCombo);
             String dirName = config.get(OPEN_FILE_CHOOSER_DIRECTORY_KEY, null);
             if (dirName != null){
@@ -954,7 +939,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     }//GEN-LAST:event_progressDisplayActionPerformed
 
     private void formatImageComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_formatImageComboActionPerformed
-        updateConfigComboIndex(FORMAT_IMAGE_SETTING_KEY,formatImageCombo);
+        updateConfigComboIndex(IMAGE_FORMAT_SETTING_KEY,formatImageCombo);
         populateImagePreviews();
     }//GEN-LAST:event_formatImageComboActionPerformed
 
