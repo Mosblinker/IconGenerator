@@ -678,8 +678,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         config.storeFileChooser(openFC);
         config.setSelectedFile(openFC, file);
         if (file != null){
-            imgGen = new GenerateImages1(file);
-            imgGen.execute();
+            imgGen1 = new GenerateImages1(file);
+            imgGen1.execute();
         }
     }//GEN-LAST:event_openButtonActionPerformed
     
@@ -895,8 +895,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
     private void circleToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_circleToggleActionPerformed
         config.setIconCircular(circleToggle.isSelected());
-        imgGen = new GenerateImages1(sourceImage,getSelectedImageIndex());
-        imgGen.execute();
+        imgGen1 = new GenerateImages1(sourceImage,getSelectedImageIndex());
+        imgGen1.execute();
     }//GEN-LAST:event_circleToggleActionPerformed
     
     private int getScaleSetting(int index){
@@ -1031,7 +1031,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private IconifierConfig config;
     private boolean active = true;
     private final boolean debugMode;
-    private GenerateImages1 imgGen = null;
+    private GenerateImages1 imgGen1 = null;
     private SaveIconImages saver = null;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBoxMenuItem activeTestToggle;
@@ -1458,7 +1458,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 imagePreviewModel.addAll(newIcons);
                 imagePreviewModel.setSelectedItem(imagePreviewModel.get(Math.min(
                         Math.max(selected, 0), imagePreviewModel.size()-1)));
-
             }
             progressBar.setIndeterminate(false);
             progressBar.setStringPainted(false);
