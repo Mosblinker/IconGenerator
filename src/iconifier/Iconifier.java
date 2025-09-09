@@ -1082,6 +1082,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         settingsMenuItem.setEnabled(settingsButton.isEnabled());
         openMenuItem.setEnabled(openButton.isEnabled());
         saveMenuItem.setEnabled(saveButton.isEnabled());
+        circleToggle.setEnabled(sourceImage != null && enabled);
     }
     @Override
     public boolean isInputEnabled() {
