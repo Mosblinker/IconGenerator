@@ -721,7 +721,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
     private void formatImageComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_formatImageComboActionPerformed
         config.setImageFormatting(formatImageCombo.getSelectedIndex());
-        populateImagePreviews();
+        if (sourceImage != null){
+            imgGen = new GenerateImages(sourceImage,getSelectedImageIndex());
+            imgGen.execute();
+        }
     }//GEN-LAST:event_formatImageComboActionPerformed
 
     private void showDebugToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showDebugToggleActionPerformed
@@ -745,7 +748,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
     private void scaleComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_scaleComboActionPerformed
         config.setDefaultImageScaling(scaleCombo.getSelectedIndex());
-        if (scaleSettings.size() < imagePreviewModel.size()){
+        if (sourceImage != null && scaleSettings.size() < imagePreviewModel.size()){
             imgGen = new GenerateImages(sourceImage,getSelectedImageIndex());
             imgGen.execute();
         }
@@ -782,6 +785,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
     private void scaleOverrideComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_scaleOverrideComboActionPerformed
         int selected = previewComboBox.getSelectedIndex();
+        if (selected < 0)
+            return;
         int scale = scaleOverrideCombo.getSelectedIndex() - 1;
         int setScale = scaleSettings.getOrDefault(selected, -1);
         if (scale == setScale)
@@ -887,8 +892,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
     private void circleToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_circleToggleActionPerformed
         config.setIconCircular(circleToggle.isSelected());
-        imgGen = new GenerateImages(sourceImage,getSelectedImageIndex());
-        imgGen.execute();
+        if (sourceImage != null){
+            imgGen = new GenerateImages(sourceImage,getSelectedImageIndex());
+            imgGen.execute();
+        }
     }//GEN-LAST:event_circleToggleActionPerformed
     
     private int getScaleSetting(int index){
