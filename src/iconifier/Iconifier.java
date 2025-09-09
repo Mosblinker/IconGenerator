@@ -236,7 +236,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         formatImageCombo.setSelectedIndex(config.getImageFormatting());
         scaleCombo.setSelectedIndex(config.getDefaultImageScaling());
         circleToggle.setSelected(config.isIconCircular());
-        featheringSpinner.setValue(config.getIconFeathering());
         for (JFileChooser fc : config.getFileChooserPreferenceMap().keySet()){
             config.loadFileChooser(fc);
         }
@@ -327,8 +326,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         includeToggle = new javax.swing.JCheckBox();
         javax.swing.Box.Filler filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
         circleToggle = new javax.swing.JCheckBox();
-        jLabel5 = new javax.swing.JLabel();
-        featheringSpinner = new javax.swing.JSpinner();
         jMenuBar1 = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openMenuItem = new javax.swing.JMenuItem();
@@ -532,29 +529,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
         controlPanel.add(circleToggle, gridBagConstraints);
-
-        jLabel5.setText("Feathering: ");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
-        controlPanel.add(jLabel5, gridBagConstraints);
-
-        featheringSpinner.setModel(new javax.swing.SpinnerNumberModel(Float.valueOf(1.0f), Float.valueOf(0.0f), Float.valueOf(1.0f), Float.valueOf(0.01f)));
-        featheringSpinner.setEditor(new javax.swing.JSpinner.NumberEditor(featheringSpinner, "#0.0%"));
-        featheringSpinner.setEnabled(false);
-        featheringSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                featheringSpinnerStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
-        controlPanel.add(featheringSpinner, gridBagConstraints);
 
         fileMenu.setText("File");
 
@@ -920,15 +894,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private void circleToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_circleToggleActionPerformed
         config.setIconCircular(circleToggle.isSelected());
     }//GEN-LAST:event_circleToggleActionPerformed
-
-    private void featheringSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_featheringSpinnerStateChanged
-        float feathering = getFeathering();
-        config.setIconFeathering(feathering);
-    }//GEN-LAST:event_featheringSpinnerStateChanged
-    
-    private float getFeathering(){
-        return (float) featheringSpinner.getValue();
-    }
     
     /**
      * @param args the command line arguments
@@ -1062,7 +1027,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private javax.swing.JCheckBox circleToggle;
     private javax.swing.JPanel controlPanel;
     private javax.swing.JMenu debugMenu;
-    private javax.swing.JSpinner featheringSpinner;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JComboBox<String> formatImageCombo;
     private javax.swing.JCheckBox includeToggle;
@@ -1070,7 +1034,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JButton openButton;
