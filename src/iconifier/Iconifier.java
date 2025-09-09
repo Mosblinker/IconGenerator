@@ -24,7 +24,6 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -206,7 +205,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         try{    // Try to load the settings from the preference node
             config = new IconifierConfig(Preferences.userRoot().node(PREFERENCE_NODE_NAME));
         } catch (SecurityException | IllegalStateException ex){
-            System.out.println("Unable to load settings: " +ex);
+            getLogger().log(Level.SEVERE, "Unable to load preference node", ex);
         }
         
         imagePreviewModel = new ComboBoxModelList<>();
@@ -990,7 +989,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         try {
             javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Iconifier.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, "Failed to load System LnF", ex);
         }
         //</editor-fold>
             // If there is no look and feel set
@@ -1174,11 +1173,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 break;
             case(IMAGE_SCALING_THUMBNAILATOR):
                 try {
-                    drawn = Thumbnails.of(image).size(w, h).asBufferedImage();
+                    drawn = Thumbnails.of(image).size(w, h).asBufferedImage();//Thumbnailator.createThumbnail(image,width,height);
                     break;
                 } catch (IOException ex) {
-                    if (isInDebug())
-                        System.out.println("Thumbnailator Error: " + ex);
+                    getLogger().log(Level.WARNING, "Thumbnailator Error", ex);
                     drawn = image;
                 }
             default:
@@ -1317,6 +1315,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         }
         @Override
         protected Void doInBackground() throws Exception {
+            getLogger().entering(this.getClass().getName(), "doInBackground");
             setInputEnabled(false);
             progressBar.setValue(0);
             progressBar.setStringPainted(true);
@@ -1335,7 +1334,9 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                         g.dispose();
                     }
                 } catch (IOException ex) {
+                    getLogger().log(Level.WARNING, "Error loading file", ex);
                     fileExc = ex;
+                    getLogger().exiting(this.getClass().getName(), "doInBackground");
                     return null;
                 }
             }
@@ -1410,8 +1411,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 }
                 success = true;
             } catch (Exception ex){
+                getLogger().log(Level.WARNING, "Error creating images", ex);
                 exc = ex;
             }
+            getLogger().exiting(this.getClass().getName(), "doInBackground");
             return null;
         }
         @Override
@@ -1419,14 +1422,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             loading = false;
             if (!success){
                 if (fileExc != null){
-                    if (isInDebug())
-                        System.out.println("File Error: " + fileExc);
                     JOptionPane.showMessageDialog(Iconifier.this, 
                             "An error occurred while attempting to load the image from the file.\n\nError: "+fileExc, 
                             "Error Loading Image", JOptionPane.ERROR_MESSAGE);
                 } else if (exc != null){
-                    if (isInDebug())
-                        System.out.println("Generation Error: " + exc);
                     JOptionPane.showMessageDialog(Iconifier.this, 
                             "An error occurred while attempting generate the icon images.\n\nError: "+exc, 
                             "Error Generating Images", JOptionPane.ERROR_MESSAGE);
@@ -1535,14 +1534,17 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         }
         @Override
         protected Void doInBackground() throws Exception {
+            getLogger().entering(this.getClass().getName(), "doInBackground");
             saving = true;
             setInputEnabled(false);
             progressBar.setValue(0);
             progressBar.setStringPainted(true);
             progressDisplay.setString("Saving Icon Images");
             progressBar.setIndeterminate(true);
-            if (!createDirectories(file.getParentFile()))
+            if (!createDirectories(file.getParentFile())){
+                getLogger().exiting(this.getClass().getName(), "doInBackground");
                 return null;
+            }
             icons = new ArrayList<>(icons);
             icons.removeIf((ICOImage t) -> t == null || t.getIconIndex() < 0);
             progressBar.setMaximum(icons.size());
@@ -1569,8 +1571,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 ICOEncoder.write(images, (useBPP) ? bpp : null, compress, out);
                 success = true;
             } catch (IOException ex){
+                getLogger().log(Level.WARNING, "Error saving file", ex);
                 exc = ex;
             }
+            getLogger().exiting(this.getClass().getName(), "doInBackground");
             return null;
         }
         @Override
@@ -1578,8 +1582,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             saving = false;
             if (!success){
                 if (exc != null){
-                    if (isInDebug())
-                        System.out.println("File Error: " + exc);
                     JOptionPane.showMessageDialog(Iconifier.this, 
                             "An error occurred while attempting to save the icon images to the file.\n\nError: "+exc, 
                             "Error Saving Image", JOptionPane.ERROR_MESSAGE);
