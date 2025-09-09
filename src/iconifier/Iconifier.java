@@ -895,6 +895,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
     private void circleToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_circleToggleActionPerformed
         config.setIconCircular(circleToggle.isSelected());
+        imgGen = new GenerateImages1(sourceImage);
+        imgGen.execute();
     }//GEN-LAST:event_circleToggleActionPerformed
     
     private int getScaleSetting(int index){
