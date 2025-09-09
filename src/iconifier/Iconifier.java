@@ -12,6 +12,7 @@ import components.progress.JProgressDisplayMenu;
 import files.FilesExtended;
 import files.extensions.ImageExtensions;
 import icons.*;
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -506,7 +507,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         controlPanel.add(includeToggle, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -527,7 +529,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
         controlPanel.add(circleToggle, gridBagConstraints);
 
@@ -690,29 +693,14 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             System.out.println((max-sourceImage.getWidth()) + " x " + (max-sourceImage.getHeight()));
         }
         
-        if (icons != null){
-            for (int i = 0; i < icons.size(); i++){
-                for (int j = 0; j < icons.get(i).size(); j++){
-                    ICOImage img = icons.get(i).get(j);
-                    System.out.printf("\t(%3d %3d) %3d: (%3d x %3d) %2d (%5b) %5b (%2d %5b %5b)%n",
-                            i, j, 
-                            img.getIconIndex(), img.getWidth(), img.getHeight(),
-                            img.getColourDepth(), img.isIndexed(), img.isPngCompressed(),
-                            scaleSettings.getOrDefault(i, -1), excludedSet.contains(i), 
-                            compressedSet.contains(i));
-                }
-            }
-            System.out.println();
-        }
-        
         for (int i = 0; i < imagePreviewModel.size(); i++){
             ICOImage img = imagePreviewModel.get(i);
             System.out.printf("\t(%3d) %3d: (%3d x %3d) %2d (%5b) %5b (%2d %5b %5b)%n",
                         i, 
                         img.getIconIndex(), img.getWidth(), img.getHeight(),
                         img.getColourDepth(), img.isIndexed(), img.isPngCompressed(),
-                        scaleSettings.getOrDefault(i, scaleCombo.getSelectedIndex()), 
-                        excludedSet.contains(i), compressedSet.contains(i));
+                        getScaleSetting(i), excludedSet.contains(i), 
+                        compressedSet.contains(i));
         }
         System.out.println();
     }//GEN-LAST:event_printTestButtonActionPerformed
@@ -733,7 +721,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
     private void formatImageComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_formatImageComboActionPerformed
         config.setImageFormatting(formatImageCombo.getSelectedIndex());
-        populateImagePreviews();
+        if (sourceImage != null){
+            imgGen = new GenerateImages(sourceImage,getSelectedImageIndex());
+            imgGen.execute();
+        }
     }//GEN-LAST:event_formatImageComboActionPerformed
 
     private void showDebugToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showDebugToggleActionPerformed
@@ -747,15 +738,20 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     }//GEN-LAST:event_useDebugIconToggleActionPerformed
 
     private void pngCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pngCheckBoxActionPerformed
-        for (ICOImage img : icons.get(previewComboBox.getSelectedIndex())){
-            img.setPngCompressed(pngCheckBox.isSelected());
-        }
+        if (pngCheckBox.isSelected())
+            compressedSet.add(previewComboBox.getSelectedIndex());
+        else
+            compressedSet.remove(previewComboBox.getSelectedIndex());
+        getSelectedImage().setPngCompressed(pngCheckBox.isSelected());
         previewComboBox.repaint();
     }//GEN-LAST:event_pngCheckBoxActionPerformed
 
     private void scaleComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_scaleComboActionPerformed
         config.setDefaultImageScaling(scaleCombo.getSelectedIndex());
-        populateImagePreviews();
+        if (sourceImage != null && scaleSettings.size() < imagePreviewModel.size()){
+            imgGen = new GenerateImages(sourceImage,getSelectedImageIndex());
+            imgGen.execute();
+        }
     }//GEN-LAST:event_scaleComboActionPerformed
 
     private void previewComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_previewComboBoxActionPerformed
@@ -778,21 +774,19 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             excludedSet.add(selected);
             diff = -1;
         }
-        for (ICOImage img : icons.get(selected)){
-            img.setIconIndex(index);
-        }
-        for (int i = selected+1; i < icons.size(); i++){
-            for (ICOImage img : icons.get(i)){
-                int j = img.getIconIndex();
-                if (j >= 0)
-                    img.setIconIndex(Math.max(j+diff,0));
-            }
+        imagePreviewModel.get(selected).setIconIndex(index);
+        for (int i = selected+1; i < imagePreviewModel.size(); i++){
+            ICOImage img = imagePreviewModel.get(i);
+            if (img.getIconIndex() >= 0)
+                img.setIconIndex(Math.max(img.getIconIndex()+diff,0));
         }
         previewComboBox.repaint();
     }//GEN-LAST:event_includeToggleActionPerformed
 
     private void scaleOverrideComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_scaleOverrideComboActionPerformed
         int selected = previewComboBox.getSelectedIndex();
+        if (selected < 0)
+            return;
         int scale = scaleOverrideCombo.getSelectedIndex() - 1;
         int setScale = scaleSettings.getOrDefault(selected, -1);
         if (scale == setScale)
@@ -801,7 +795,11 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             scaleSettings.remove(selected);
         else
             scaleSettings.put(selected, scale);
-        imagePreviewModel.set(selected, getIconImage(selected));
+        ICOImage temp = getSelectedImage();
+        imagePreviewModel.set(selected, createICOImage(processImage(sourceImage,
+                temp.getWidth(),temp.getHeight(),formatImageCombo.getSelectedIndex(),
+                getScaleSetting(selected)),temp.getIconIndex(),temp.getColourDepth(),
+                temp.isPngCompressed()));
         previewComboBox.setSelectedIndex(selected);
     }//GEN-LAST:event_scaleOverrideComboActionPerformed
     
@@ -894,7 +892,15 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
     private void circleToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_circleToggleActionPerformed
         config.setIconCircular(circleToggle.isSelected());
+        if (sourceImage != null){
+            imgGen = new GenerateImages(sourceImage,getSelectedImageIndex());
+            imgGen.execute();
+        }
     }//GEN-LAST:event_circleToggleActionPerformed
+    
+    private int getScaleSetting(int index){
+        return scaleSettings.getOrDefault(index, scaleCombo.getSelectedIndex());
+    }
     
     /**
      * @param args the command line arguments
@@ -974,45 +980,29 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     
     private void setPreviewImage(){
         int selected = previewComboBox.getSelectedIndex();
-        ICOImage img = (ICOImage) imagePreviewModel.getSelectedItem();
+        ICOImage img = getSelectedImage();
         setPreviewImage((img != null) ? img.getImage() : null);
         pngCheckBox.setSelected((img != null) ? img.isPngCompressed() : false);
         includeToggle.setSelected((img != null) ? img.getIconIndex() >= 0 : false);
         scaleOverrideCombo.setSelectedIndex(scaleSettings.getOrDefault(selected, -1)+1);
     }
     
-    private ICOImage getIconImage(int index, int scale, int format){
-        return icons.get(index).get((scaleSettings.getOrDefault(index,scale)*
-                (LAST_IMAGE_FORMATTING+1))+format);
+    
+    
+    private ICOImage getSelectedImage(){
+        if (imagePreviewModel.getSelectedItem() instanceof ICOImage)
+            return (ICOImage)imagePreviewModel.getSelectedItem();
+        return null;
     }
     
-    private ICOImage getIconImage(int index){
-        return getIconImage(index,scaleCombo.getSelectedIndex(),formatImageCombo.getSelectedIndex());
+    private int getSelectedImageIndex(){
+        return imagePreviewModel.indexOf(imagePreviewModel.getSelectedItem());
     }
     
-    private void populateImagePreviews(){
-        int selected = imagePreviewModel.indexOf(imagePreviewModel.getSelectedItem());
-        imagePreviewModel.clear();
-        if (icons == null)
-            return;
-        int scale = scaleCombo.getSelectedIndex();
-        int format = formatImageCombo.getSelectedIndex();
-        for (int i = 0; i < icons.size(); i++){
-            imagePreviewModel.add(getIconImage(i,scale,format));
-        }
-        if (selected < 0)
-            selected = imagePreviewModel.size()-1;
-        imagePreviewModel.setSelectedItem(imagePreviewModel.get(selected));
-    }
     
     private BufferedImage sourceImage = null;
     private DebuggingIcon debugIcon = null;
     private ComboBoxModelList<ICOImage> imagePreviewModel;
-    /**
-     * First list is the icon index, second list is the scale setting, third 
-     * list is image formatting.
-     */
-    private ArrayList<ArrayList<ICOImage>> icons = null;
     private Map<Integer, Integer> scaleSettings = new TreeMap<>();
     private Set<Integer> excludedSet = new TreeSet<>();
     private Set<Integer> compressedSet = new TreeSet<>();
@@ -1022,7 +1012,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private final boolean debugMode;
     private GenerateImages imgGen = null;
     private SaveIconImages saver = null;
-    private BufferedImage mask = null;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBoxMenuItem activeTestToggle;
     private javax.swing.JCheckBox circleToggle;
@@ -1078,6 +1067,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         settingsMenuItem.setEnabled(settingsButton.isEnabled());
         openMenuItem.setEnabled(openButton.isEnabled());
         saveMenuItem.setEnabled(saveButton.isEnabled());
+        circleToggle.setEnabled(sourceImage != null && enabled);
     }
     @Override
     public boolean isInputEnabled() {
@@ -1103,6 +1093,46 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private void incrementProgress(){
         progressBar.setValue(progressBar.getValue()+1);
         slowTestToggle.runSlowTest();
+    }
+    /**
+     * 
+     * @param g
+     * @param mask
+     * @param x
+     * @param y
+     * @param invert 
+     */
+    private void maskImage(Graphics2D g, Image mask, int x, int y, 
+            boolean invert){
+        g.setComposite((invert)?AlphaComposite.DstOut:AlphaComposite.DstIn);
+        g.drawImage(mask, x, y, null);
+    }
+    /**
+     * 
+     * @param g
+     * @param mask
+     * @param x
+     * @param y 
+     */
+    private void maskImage(Graphics2D g, Image mask, int x, int y){
+        maskImage(g,mask,x,y,false);
+    }
+    /**
+     * 
+     * @param g
+     * @param mask
+     * @param invert 
+     */
+    private void maskImage(Graphics2D g, Image mask, boolean invert){
+        maskImage(g,mask,0,0,invert);
+    }
+    /**
+     * 
+     * @param g
+     * @param mask 
+     */
+    private void maskImage(Graphics2D g, Image mask){
+        maskImage(g,mask,false);
     }
     
     private BufferedImage scaleImage(BufferedImage image,int x,int y,int w,int h,
@@ -1217,20 +1247,43 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 y = Math.floorDiv(height - h, 2);
                 break;
         }
-//        System.out.printf("%3d %3d: (%3d, %3d) %3d x %3d (%3d x %3d) (%3d x %3d, %2.5f)%n",
-//                format,interpolation,x,y,w,h,width,height,image.getWidth(),image.getHeight(),ratio);
         return scaleImage(image,x, y, w, h,width,height, interpolation);
     }
     
     private BufferedImage convertColorDepth(BufferedImage image, int bpp){
         if (bpp == 24)
             return ConvertUtil.convert24(image);
-        // For bit depths less than 32, determine an alpha color and then swap 
-        // that color out for transparancy. This would perferably be a color 
-        // that is unused in the image. Additionally, for bit depths less than 
-        // 24, perhaps this should generate a best fitting color map. 
+        // TODO: For bit depths less than 32, determine an alpha color and then 
+        // swap that color out for transparancy. This would perferably be a 
+        // color that is unused in the image. Additionally, for bit depths less 
+        // than 24, perhaps this should generate a best fitting color map. 
         // Also, the alpha color and color map should be customizable by the user
         return ICOEncoder.convert(image, bpp);
+    }
+    
+    private BufferedImage getMaskImage(int width, int height, int bpp){
+        BufferedImage mask = new BufferedImage(width,height,
+                BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = mask.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+                (bpp==32)?RenderingHints.VALUE_ANTIALIAS_ON:
+                        RenderingHints.VALUE_ANTIALIAS_OFF);
+        g.fillOval(0, 0, width, height);
+        g.dispose();
+        return mask;
+    }
+    
+    private ICOImage createICOImage(BufferedImage image, int index, int bpp, 
+            boolean compressed){
+        if (circleToggle.isSelected()){
+            Graphics2D g = image.createGraphics();
+            maskImage(g,getMaskImage(image.getWidth(),image.getHeight(),bpp));
+            g.dispose();
+        }
+        ICOImage icon = createICOImage(convertColorDepth(image,bpp));
+        icon.setIconIndex(index);
+        icon.setPngCompressed(compressed);
+        return icon;
     }
     
     private class GenerateImages extends SwingWorker<Void, Void>{
@@ -1239,7 +1292,9 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         
         private BufferedImage image;
         
-        private final ArrayList<ArrayList<ICOImage>> newIcons = new ArrayList<>();
+        private final ArrayList<ICOImage> newIcons = new ArrayList<>();
+        
+        private final Set<Integer> compressed = new HashSet<>();
         
         private IOException fileExc = null;
         
@@ -1249,14 +1304,26 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         
         private volatile boolean success = false;
         
-        GenerateImages(File file){
+        private Integer selected;
+        
+        GenerateImages(File file, Integer selected){
             this.file = Objects.requireNonNull(file);
             image = null;
+            this.selected = selected;
+        }
+        
+        GenerateImages(File file){
+            this(file,null);
+        }
+        
+        GenerateImages(BufferedImage image, Integer selected){
+            this.image = Objects.requireNonNull(image);
+            file = null;
+            this.selected = selected;
         }
         
         GenerateImages(BufferedImage image){
-            this.image = Objects.requireNonNull(image);
-            file = null;
+            this(image,null);
         }
         
         public synchronized boolean isLoading(){
@@ -1266,6 +1333,30 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         public synchronized boolean isSuccessful(){
             return success;
         }
+        
+        private BufferedImage loadImage(File file){
+            getLogger().entering(this.getClass().getName(), "loadImage", file);
+            progressBar.setIndeterminate(true);
+            progressDisplay.setString("Loading Image From File");
+            try {
+                BufferedImage image = ImageIO.read(file);
+                if (image.getType() != BufferedImage.TYPE_INT_ARGB){
+                    BufferedImage temp = image;
+                    image = new BufferedImage(temp.getWidth(),temp.getHeight(),
+                            BufferedImage.TYPE_INT_ARGB);
+                    Graphics2D g = image.createGraphics();
+                    g.drawImage(temp, 0, 0, null);
+                    g.dispose();
+                }
+                getLogger().exiting(this.getClass().getName(), "loadImage", image);
+                return image;
+            } catch (IOException ex) {
+                getLogger().log(Level.WARNING, "Error loading file", ex);
+                fileExc = ex;
+                getLogger().exiting(this.getClass().getName(), "loadImage", null);
+                return null;
+            }
+        }
         @Override
         protected Void doInBackground() throws Exception {
             getLogger().entering(this.getClass().getName(), "doInBackground");
@@ -1274,92 +1365,50 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             progressBar.setStringPainted(true);
             loading = true;
             if (file != null){
-                progressBar.setIndeterminate(true);
-                progressDisplay.setString("Loading Image From File");
-                try {
-                    image = ImageIO.read(file);
-                    if (image.getType() != BufferedImage.TYPE_INT_ARGB){
-                        BufferedImage temp = image;
-                        image = new BufferedImage(temp.getWidth(),temp.getHeight(),
-                                BufferedImage.TYPE_INT_ARGB);
-                        Graphics2D g = image.createGraphics();
-                        g.drawImage(temp, 0, 0, null);
-                        g.dispose();
-                    }
-                } catch (IOException ex) {
-                    getLogger().log(Level.WARNING, "Error loading file", ex);
-                    fileExc = ex;
-                    getLogger().exiting(this.getClass().getName(), "doInBackground");
-                    return null;
-                }
+                image = loadImage(file);
+            }
+            if (image == null){
+                getLogger().exiting(this.getClass().getName(), "doInBackground");
+                return null;
             }
             progressDisplay.setString("Generating Icon Images");
-            progressBar.setMaximum(ICONS_GENERATED_COUNT);
+            
+            int format = formatImageCombo.getSelectedIndex();
+            Map<Integer,Integer> scaling = new HashMap<>();
+            if (selected != null){
+                scaling.putAll(scaleSettings);
+                compressed.addAll(compressedSet);
+            }
+            int defScaling = scaleCombo.getSelectedIndex();
+            
+            progressBar.setMaximum(DEFAULT_ICON_DIMENSIONS.length*(DEFAULT_BITS_PER_PIXEL.length+1));
+            progressBar.setValue(0);
             progressBar.setIndeterminate(false);
             
-            ArrayList<BufferedImage> formatImages = new ArrayList<>();
-            int w = image.getWidth();
-            int h = image.getHeight();
-            boolean tooLarge = w >= AUTO_SHRINK_SIZE.width && h >= AUTO_SHRINK_SIZE.height;
-            if (tooLarge){
-                double ratio = ((double)Math.min(w, h)) / Math.max(w, h);
-                if (w > h){
-                    h = Math.min((int)Math.ceil(ratio*AUTO_SHRINK_SIZE.height),AUTO_SHRINK_SIZE.height);
-                    w = AUTO_SHRINK_SIZE.width;
-                } else if (h > w){
-                    w = Math.min((int)Math.ceil(ratio*AUTO_SHRINK_SIZE.width),AUTO_SHRINK_SIZE.width);
-                    h = AUTO_SHRINK_SIZE.height;
-                } else{
-                    w = AUTO_SHRINK_SIZE.width;
-                    h = AUTO_SHRINK_SIZE.height;
-                }
-            }
-            
-            for (int s = FIRST_IMAGE_SCALING; 
-                    s <= LAST_IMAGE_SCALING; s++){
-                if (tooLarge){
-                    formatImages.add(scaleImage(image,w,h,s));
-                } else
-                    formatImages.add(image);
-                incrementProgress();
-            }
-            
             try{
-                ArrayList<ArrayList<BufferedImage>> images = new ArrayList<>();
-
-                for (Dimension dim : DEFAULT_ICON_DIMENSIONS) {
-                    ArrayList<BufferedImage> temp = new ArrayList<>();
-                    for (int s = FIRST_IMAGE_SCALING; 
-                            s <= LAST_IMAGE_SCALING; s++){
-                        BufferedImage img = formatImages.get(s);
-                        for (int f = FIRST_IMAGE_FORMATTING; 
-                                f <= LAST_IMAGE_FORMATTING; f++){
-                            temp.add(processImage(img,dim.width,dim.height,f,s));
-                            incrementProgress();
-                        }
-                    }
-                    images.add(temp);
+                ArrayList<BufferedImage> images = new ArrayList<>();
+                for (int i = 0; i < DEFAULT_ICON_DIMENSIONS.length; i++){
+                    Dimension dim = DEFAULT_ICON_DIMENSIONS[i];
+                    images.add(processImage(image,dim.width,dim.height,
+                            format,scaling.getOrDefault(i, defScaling)));
+                    incrementProgress();
                 }
-
-    //            int iconIndex = 0;
+                
+                int index = 0;
                 for (int d : DEFAULT_BITS_PER_PIXEL){
-                    for (ArrayList<BufferedImage> imgArr : images){
-                        int index = newIcons.size();
-    //                    boolean included = !excludedSet.contains(index);
-                        ArrayList<ICOImage> temp = new ArrayList<>();
-                        for (BufferedImage img : imgArr){
-                            ICOImage icon = createICOImage(convertColorDepth(img,d));
-                            icon.setIconIndex(index);
-    //                        if (included)
-    //                            icon.setIconIndex(iconIndex);
-                            icon.setPngCompressed(DEFAULT_AUTO_COMPRESSED_INDEXES
-                                    .contains(index));
-                            temp.add(icon);
-                            incrementProgress();
-                        }
-                        newIcons.add(temp);
-    //                    if (included)
-    //                        iconIndex++;
+                    for (BufferedImage img : images){
+                        int i = index;
+                        if (selected == null){
+                            if (img.getWidth() >= AUTO_COMPRESS_SIZE.width || 
+                                    img.getHeight() >= AUTO_COMPRESS_SIZE.height)
+                                compressed.add(newIcons.size());
+                        } else if (excludedSet.contains(newIcons.size()))
+                            i = -1;
+                        newIcons.add(createICOImage(img,i,d,
+                                compressed.contains(newIcons.size())));
+                        if (i >= 0)
+                            index++;
+                        incrementProgress();
                     }
                 }
                 success = true;
@@ -1389,13 +1438,18 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 }
             } else {
                 sourceImage = image;
-                icons = newIcons;
-                compressedSet.clear();
-                compressedSet.addAll(DEFAULT_AUTO_COMPRESSED_INDEXES);
-                excludedSet.clear();
-                scaleSettings.clear();
-                imagePreviewModel.setSelectedItem(null);
-                populateImagePreviews();
+                if (selected == null){
+                    compressedSet.clear();
+                    compressedSet.addAll(compressed);
+                    excludedSet.clear();
+                    scaleSettings.clear();
+                    imagePreviewModel.setSelectedItem(null);
+                    selected = newIcons.size()-1;
+                }
+                imagePreviewModel.clear();
+                imagePreviewModel.addAll(newIcons);
+                imagePreviewModel.setSelectedItem(imagePreviewModel.get(Math.min(
+                        Math.max(selected, 0), imagePreviewModel.size()-1)));
             }
             progressBar.setIndeterminate(false);
             progressBar.setStringPainted(false);
@@ -1403,6 +1457,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             setInputEnabled(true);
         }
     }
+    
     /**
      * This attempts to create the given directories, opening an Error 
      * JOptionPane if failed, and returns whether it was successful.
