@@ -1315,14 +1315,26 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         
         private volatile boolean success = false;
         
-        GenerateImages1(File file){
+        private Integer selected;
+        
+        GenerateImages1(File file, Integer selected){
             this.file = Objects.requireNonNull(file);
             image = null;
+            this.selected = selected;
+        }
+        
+        GenerateImages1(File file){
+            this(file,null);
+        }
+        
+        GenerateImages1(BufferedImage image, Integer selected){
+            this.image = Objects.requireNonNull(image);
+            file = null;
+            this.selected = selected;
         }
         
         GenerateImages1(BufferedImage image){
-            this.image = Objects.requireNonNull(image);
-            file = null;
+            this(image,null);
         }
         
         public synchronized boolean isLoading(){
@@ -1457,6 +1469,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                 scaleSettings.clear();
                 imagePreviewModel.setSelectedItem(null);
                 populateImagePreviews();
+                if (selected != null && selected >= 0 && selected < imagePreviewModel.size())
+                    imagePreviewModel.setSelectedItem(imagePreviewModel.get(selected));
             }
             progressBar.setIndeterminate(false);
             progressBar.setStringPainted(false);
