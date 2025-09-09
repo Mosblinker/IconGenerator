@@ -161,7 +161,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      * this program.
      */
     private static final String PREFERENCE_NODE_NAME = 
-            "milo/icon/gen/IconGenerator";
+            "mosblinker/icon/gen/IconGenerator";
     /**
      * This is the name of the child preference node used to store values 
      * related to the open file chooser.
