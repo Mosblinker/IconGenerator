@@ -965,15 +965,20 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             // Log the Java version
         getLogger().log(Level.CONFIG, "Java version: {0}", 
                 System.getProperty("java.version"));
-        /* Set the System Look and Feel look and feel */
+        /* Set the Nimbus Look and Feel look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If System is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
         try {
-            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            getLogger().log(Level.SEVERE, "Failed to load System LnF", ex);
+            getLogger().log(Level.SEVERE, "Failed to load Nimbus LnF", ex);
         }
         //</editor-fold>
             // If there is no look and feel set
