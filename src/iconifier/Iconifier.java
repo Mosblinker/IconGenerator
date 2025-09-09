@@ -680,8 +680,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         config.storeFileChooser(openFC);
         config.setSelectedFile(openFC, file);
         if (file != null){
-            imgGen1 = new GenerateImages1(file);
-            imgGen1.execute();
+            imgGen = new GenerateImages(file);
+            imgGen.execute();
         }
     }//GEN-LAST:event_openButtonActionPerformed
     
@@ -691,21 +691,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             System.out.println(sourceImage.getWidth() + " x " + sourceImage.getHeight());
             int max = Math.max(sourceImage.getWidth(), sourceImage.getHeight());
             System.out.println((max-sourceImage.getWidth()) + " x " + (max-sourceImage.getHeight()));
-        }
-        
-        if (iconsOld != null){
-            for (int i = 0; i < iconsOld.size(); i++){
-                for (int j = 0; j < iconsOld.get(i).size(); j++){
-                    ICOImage img = iconsOld.get(i).get(j);
-                    System.out.printf("\t(%3d %3d) %3d: (%3d x %3d) %2d (%5b) %5b (%2d %5b %5b)%n",
-                            i, j, 
-                            img.getIconIndex(), img.getWidth(), img.getHeight(),
-                            img.getColourDepth(), img.isIndexed(), img.isPngCompressed(),
-                            scaleSettings.getOrDefault(i, -1), excludedSet.contains(i), 
-                            compressedSet.contains(i));
-                }
-            }
-            System.out.println();
         }
         
         for (int i = 0; i < imagePreviewModel.size(); i++){
@@ -755,17 +740,15 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         else
             compressedSet.remove(previewComboBox.getSelectedIndex());
         getSelectedImage().setPngCompressed(pngCheckBox.isSelected());
-        if (iconsOld != null){
-            for (ICOImage img : iconsOld.get(previewComboBox.getSelectedIndex())){
-                img.setPngCompressed(pngCheckBox.isSelected());
-            }
-        }
         previewComboBox.repaint();
     }//GEN-LAST:event_pngCheckBoxActionPerformed
 
     private void scaleComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_scaleComboActionPerformed
         config.setDefaultImageScaling(scaleCombo.getSelectedIndex());
-        populateImagePreviews();
+        if (scaleSettings.size() < imagePreviewModel.size()){
+            imgGen = new GenerateImages(sourceImage,getSelectedImageIndex());
+            imgGen.execute();
+        }
     }//GEN-LAST:event_scaleComboActionPerformed
 
     private void previewComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_previewComboBoxActionPerformed
@@ -794,18 +777,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             if (img.getIconIndex() >= 0)
                 img.setIconIndex(Math.max(img.getIconIndex()+diff,0));
         }
-        if (iconsOld != null){
-            for (ICOImage img : iconsOld.get(selected)){
-                img.setIconIndex(index);
-            }
-            for (int i = selected+1; i < iconsOld.size(); i++){
-                for (ICOImage img : iconsOld.get(i)){
-                    int j = img.getIconIndex();
-                    if (j >= 0)
-                        img.setIconIndex(Math.max(j+diff,0));
-                }
-            }
-        }
         previewComboBox.repaint();
     }//GEN-LAST:event_includeToggleActionPerformed
 
@@ -819,7 +790,11 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             scaleSettings.remove(selected);
         else
             scaleSettings.put(selected, scale);
-        imagePreviewModel.set(selected, getIconImage(selected));
+        ICOImage temp = getSelectedImage();
+        imagePreviewModel.set(selected, createICOImage(processImage(sourceImage,
+                temp.getWidth(),temp.getHeight(),formatImageCombo.getSelectedIndex(),
+                getScaleSetting(selected)),temp.getIconIndex(),temp.getColourDepth(),
+                temp.isPngCompressed()));
         previewComboBox.setSelectedIndex(selected);
     }//GEN-LAST:event_scaleOverrideComboActionPerformed
     
@@ -912,8 +887,6 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
     private void circleToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_circleToggleActionPerformed
         config.setIconCircular(circleToggle.isSelected());
-        imgGen1 = new GenerateImages1(sourceImage,getSelectedImageIndex());
-        imgGen1.execute();
         imgGen = new GenerateImages(sourceImage,getSelectedImageIndex());
         imgGen.execute();
     }//GEN-LAST:event_circleToggleActionPerformed
