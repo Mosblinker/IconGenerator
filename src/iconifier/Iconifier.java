@@ -233,11 +233,11 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         config.addFileChooser(saveFC, SAVE_FILE_CHOOSER_PREFERENCE_NODE);
         openFC.addPropertyChangeListener(config.new FileChooserPropertyChangeListener());
         
-        try{    // Try to load the settings from the preference node
-            int displaySettings = config.getPreferences().getInt(PROGRESS_DISPLAY_KEY, 
-                    progressDisplay.getDisplaySettings());
-            if (displaySettings != 0)
-                progressDisplay.setDisplaySettings(displaySettings);
+            // Try to load the settings from the preference node
+        int displaySettings = config.getProgressDisplaySetting(progressDisplay.getDisplaySettings());
+        if (displaySettings != 0)
+            progressDisplay.setDisplaySettings(displaySettings);
+        try{    
             showPreviewBorderToggle.setSelected(config.getPreferences().getBoolean(SHOW_PREVIEW_BORDER_KEY, 
                     showPreviewBorderToggle.isSelected()));
             scaleImageAlwaysToggle.setSelected(config.getPreferences().getBoolean(SCALE_IMAGE_PREVIEW_KEY, 
@@ -936,14 +936,8 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      */
     private void progressDisplayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_progressDisplayActionPerformed
         progressDisplay.updateProgressString(progressBar);
-        if (progressDisplay.isProgressDisplayed() && config.getPreferences() != null){
-            try{
-                config.getPreferences().putInt(PROGRESS_DISPLAY_KEY, progressDisplay.getDisplaySettings());
-            } catch (IllegalStateException ex){ 
-                if (isInDebug())    // If we are in debug mode
-                    System.out.println("Error: " + ex);
-            }
-        }
+        if (progressDisplay.isProgressDisplayed())
+            config.setProgressDisplaySetting(progressDisplay.getDisplaySettings());
     }//GEN-LAST:event_progressDisplayActionPerformed
 
     private void formatImageComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_formatImageComboActionPerformed

@@ -408,6 +408,21 @@ public class IconifierConfig {
         if (filter != null)
             fc.setFileFilter(filter);
     }
+    /**
+     * 
+     * @param value 
+     */
+    public void setProgressDisplaySetting(int value){
+        getPreferences().putInt(PROGRESS_DISPLAY_KEY, value);
+    }
+    /**
+     * 
+     * @param defaultValue
+     * @return 
+     */
+    public int getProgressDisplaySetting(int defaultValue){
+        return getPreferences().getInt(PROGRESS_DISPLAY_KEY, defaultValue);
+    }
     
     
     /**
