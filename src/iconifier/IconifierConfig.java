@@ -34,8 +34,10 @@ public class IconifierConfig {
     public static final String PROGRAM_BOUNDS_KEY = "ProgramBounds";
     
     public static final String SHOW_PREVIEW_BORDER_KEY = "ShowPreviewBorder";
-    
-    public static final String SCALE_IMAGE_PREVIEW_KEY = "ScaleImagePreview";
+    /**
+     * 
+     */
+    public static final String ALWAYS_SCALE_KEY = "AlwaysScale";
     
     public static final String IMAGE_FORMAT_SETTING_KEY = "FormatImage";
     
@@ -437,6 +439,20 @@ public class IconifierConfig {
      */
     public void setPreviewBorderShown(boolean value){
         getPreferences().putBoolean(SHOW_PREVIEW_BORDER_KEY, value);
+    }
+    /**
+     * 
+     * @return 
+     */
+    public boolean isImageAlwaysScaled(){
+        return getPreferences().getBoolean(ALWAYS_SCALE_KEY, false);
+    }
+    /**
+     * 
+     * @param value 
+     */
+    public void setImageAlwaysScaled(boolean value){
+        getPreferences().putBoolean(ALWAYS_SCALE_KEY, value);
     }
     /**
      * 

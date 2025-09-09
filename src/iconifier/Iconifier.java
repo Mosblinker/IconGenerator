@@ -224,11 +224,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         int displaySettings = config.getProgressDisplaySetting(progressDisplay.getDisplaySettings());
         if (displaySettings != 0)
             progressDisplay.setDisplaySettings(displaySettings);
+        showPreviewBorderToggle.setSelected(config.isPreviewBorderShown(
+                showPreviewBorderToggle.isSelected()));
+        scaleImageAlwaysToggle.setSelected(config.isImageAlwaysScaled());
         try{    
-            showPreviewBorderToggle.setSelected(config.isPreviewBorderShown(
-                    showPreviewBorderToggle.isSelected()));
-            scaleImageAlwaysToggle.setSelected(config.getPreferences().getBoolean(SCALE_IMAGE_PREVIEW_KEY, 
-                    scaleImageAlwaysToggle.isSelected()));
             setComboIndexFromConfig(IMAGE_FORMAT_SETTING_KEY,formatImageCombo);
             setComboIndexFromConfig(SCALE_IMAGE_SETTING_KEY,scaleCombo);
             circleToggle.setSelected(config.getPreferences().getBoolean(CIRCULAR_ICON_SETTING_KEY, 
@@ -961,7 +960,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
 
     private void scaleImageAlwaysToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_scaleImageAlwaysToggleActionPerformed
         previewLabel.setImageAlwaysScaled(scaleImageAlwaysToggle.isSelected());
-        updateConfigBoolean(SCALE_IMAGE_PREVIEW_KEY, scaleImageAlwaysToggle);
+        config.setImageAlwaysScaled(scaleImageAlwaysToggle.isSelected());
     }//GEN-LAST:event_scaleImageAlwaysToggleActionPerformed
     /**
      * This returns whether this window is maximized in either the horizontal or 
