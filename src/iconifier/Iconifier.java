@@ -1012,7 +1012,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     }
     
     private void populateImagePreviews(){
-        int selected = imagePreviewModel.indexOf(imagePreviewModel.getSelectedItem());
+        int selected = getSelectedImageIndex();
         imagePreviewModel.clear();
         if (iconsOld == null)
             return;
@@ -1425,16 +1425,21 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
                             format,scaling.getOrDefault(i, defScaling)));
                     incrementProgress();
                 }
-
+                
+                int index = 0;
                 for (int d : DEFAULT_BITS_PER_PIXEL){
                     for (BufferedImage img : images){
+                        int i = index;
                         if (selected == null){
                             if (img.getWidth() >= AUTO_COMPRESS_SIZE.width || 
                                     img.getHeight() >= AUTO_COMPRESS_SIZE.height)
                                 compressed.add(newIcons.size());
-                        }
-                        newIcons.add(createICOImage(img,newIcons.size(),d,
+                        } else if (excludedSet.contains(newIcons.size()))
+                            i = -1;
+                        newIcons.add(createICOImage(img,i,d,
                                 compressed.contains(newIcons.size())));
+                        if (i >= 0)
+                            index++;
                         incrementProgress();
                     }
                 }
