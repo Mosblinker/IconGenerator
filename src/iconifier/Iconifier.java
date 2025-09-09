@@ -1007,6 +1007,12 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         return getIconImage(index,scaleCombo.getSelectedIndex(),formatImageCombo.getSelectedIndex());
     }
     
+    private ICOImage getSelectedImage(){
+        if (imagePreviewModel.getSelectedItem() instanceof ICOImage)
+            return (ICOImage)imagePreviewModel.getSelectedItem();
+        return null;
+    }
+    
     private int getSelectedImageIndex(){
         return imagePreviewModel.indexOf(imagePreviewModel.getSelectedItem());
     }
