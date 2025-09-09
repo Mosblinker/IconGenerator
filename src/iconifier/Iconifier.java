@@ -676,7 +676,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         config.storeFileChooser(openFC);
         config.setSelectedFile(openFC, file);
         if (file != null){
-            imgGen = new GenerateImages(file);
+            imgGen = new GenerateImages1(file);
             imgGen.execute();
         }
     }//GEN-LAST:event_openButtonActionPerformed
@@ -1019,7 +1019,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private IconifierConfig config;
     private boolean active = true;
     private final boolean debugMode;
-    private GenerateImages imgGen = null;
+    private GenerateImages1 imgGen = null;
     private SaveIconImages saver = null;
     private BufferedImage mask = null;
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1227,7 +1227,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         return ICOEncoder.convert(image, bpp);
     }
     
-    private class GenerateImages extends SwingWorker<Void, Void>{
+    private class GenerateImages1 extends SwingWorker<Void, Void>{
         
         private final File file;
         
@@ -1243,12 +1243,12 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         
         private volatile boolean success = false;
         
-        GenerateImages(File file){
+        GenerateImages1(File file){
             this.file = Objects.requireNonNull(file);
             image = null;
         }
         
-        GenerateImages(BufferedImage image){
+        GenerateImages1(BufferedImage image){
             this.image = Objects.requireNonNull(image);
             file = null;
         }
