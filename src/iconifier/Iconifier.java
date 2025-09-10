@@ -151,6 +151,32 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
     private static final String SAVE_FILE_CHOOSER_PREFERENCE_NODE = 
             "SaveFileChooser";
     /**
+     * This is the credits for the program. This is currently private as I plan 
+     * to rework it.
+     * @todo Rework this and then make it public. Also add any additional 
+     * credits necessary
+     */
+    private static final String[][] CREDITS = {{
+            "Developers",
+            "Mosblinker - Main developer and artist."
+        },{
+//            "Testers",
+//            "*Insert Testers Here*"
+//        },{
+            "Libraries",
+            "Thumbnailator - coobird - https://github.com/coobird/thumbnailator",
+            "SwingExtended - Mosblinker - https://github.com/Mosblinker/SwingExtended",
+            "FilesExtended - Mosblinker - https://github.com/Mosblinker/FilesExtended",
+            "GeomArt4J - Mosblinker - https://github.com/Mosblinker/GeomArt4J",
+            "SwingFilesExtended - Mosblinker",
+            "Measure - Mosblinker",
+            "GUIComponents - Mosblinker",
+            "ConfigUtilities - Mosblinker - https://github.com/Mosblinker/ConfigUtilities",
+            "webp-imageio - https://github.com/darkxanter/webp-imageio",
+            "UpdateChecker - TechnicJelle - https://github.com/TechnicJelle/UpdateCheckerJava",
+            "Image4J - Ian McDonagh - https://image4j.sourceforge.net/"
+    }};
+    /**
      * This is the pattern for the file handler to use for the log files of this 
      * program.
      */
