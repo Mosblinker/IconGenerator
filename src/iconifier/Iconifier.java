@@ -50,6 +50,10 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      */
     public static final String PROGRAM_VERSION = "0.2.0";
     /**
+     * The name of the author and main developer.
+     */
+    protected static final String AUTHOR_NAME = "Mosblinker";
+    /**
      * This has the path of the icon that this program displays.
      */
     public static final String ICON_FILE = "/images/"+PROGRAM_NAME+" Icon.png";
@@ -156,6 +160,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
      * 
      */
     private static final Logger LOGGER = Logger.getLogger("IconGenerator-"+PROGRAM_VERSION);
+    
     /**
      * 
      * @return 
