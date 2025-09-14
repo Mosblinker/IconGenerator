@@ -7,6 +7,9 @@
         <Property name="accessory" type="javax.swing.JComponent" editor="org.netbeans.modules.form.ComponentChooserEditor">
           <ComponentRef name="previewPanel"/>
         </Property>
+        <Property name="fileHidingEnabled" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="false" type="code"/>
+        </Property>
         <Property name="toolTipText" type="java.lang.String" value="Square images work best."/>
       </Properties>
       <Events>
@@ -16,6 +19,9 @@
     <Component class="javax.swing.JFileChooser" name="saveFC">
       <Properties>
         <Property name="dialogType" type="int" value="1"/>
+        <Property name="fileHidingEnabled" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="false" type="code"/>
+        </Property>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="fileChooserActionPerformed"/>

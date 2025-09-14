@@ -312,6 +312,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         showDebugToggle = new javax.swing.JCheckBoxMenuItem();
 
         openFC.setAccessory(previewPanel);
+        openFC.setFileHidingEnabled(false);
         openFC.setToolTipText("Square images work best.");
         openFC.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -320,6 +321,7 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         });
 
         saveFC.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
+        saveFC.setFileHidingEnabled(false);
         saveFC.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fileChooserActionPerformed(evt);
