@@ -335,6 +335,9 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle(PROGRAM_NAME);
         addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentMoved(java.awt.event.ComponentEvent evt) {
+                formComponentMoved(evt);
+            }
             public void componentResized(java.awt.event.ComponentEvent evt) {
                 formComponentResized(evt);
             }
@@ -865,6 +868,13 @@ public class Iconifier extends JFrame implements DisableGUIInput, DebugCapable{
             imgGen.execute();
         }
     }//GEN-LAST:event_circleToggleActionPerformed
+
+    private void formComponentMoved(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentMoved
+            // If the window is not maximized
+        if (!isMaximized()){
+            config.setProgramBounds(this);
+        }
+    }//GEN-LAST:event_formComponentMoved
     
     private int getScaleSetting(int index){
         return scaleSettings.getOrDefault(index, scaleCombo.getSelectedIndex());
